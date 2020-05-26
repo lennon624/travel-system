@@ -4,13 +4,14 @@
  * Author:          邓杨燊
  * Creation Date:   2020/5/26
  *******************************************/
-#include "MainWindow.h"
-#include <QtWidgets/QApplication>
+#include "Transport.h"
+TransSystem::TransSystem() {
+	//初始化航班表
+	//初始化时钟
+	//初始化旅客
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    return a.exec();
+
+}
+TransSystem::~TransSystem() {
+	//释放航班表节点
 }
