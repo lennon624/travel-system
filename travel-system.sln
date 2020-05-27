@@ -7,7 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "source_code", "source_code\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1BA79C36-DEB9-4EB8-AB91-93A34C8D686B}"
 	ProjectSection(SolutionItems) = preProject
-		config.txt = config.txt
 		README.md = README.md
 	EndProjectSection
 EndProject
