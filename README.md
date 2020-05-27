@@ -8,3 +8,4 @@
 ### Transport
 * beijing guangzhou 飞机
 * beijing wuhan     火车 汽车
+* 记得在堆区分配transportSystem,不然会炸裂的

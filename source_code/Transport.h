@@ -10,8 +10,9 @@
 #include<cstdlib>
 #include<ctime>
 using namespace std;
-#define MAX_TIME	100
+#define MAX_TIME	24
 #define CITY_COUNT	4
+
 typedef enum { bus, train, plane } vehicle;
 
 /*
@@ -20,7 +21,7 @@ typedef enum { bus, train, plane } vehicle;
 */
 struct VehAttr {
 	string m_name;
-	int m_interval;			/*fix interval*/
+	int m_interval;		/*fix interval*/
 	int m_distTimes;	/*速度,相比distMap中的慢多少倍*/
 };
 
@@ -46,7 +47,7 @@ struct City {
 struct Transport
 {
 	/*TODO 把各个类的构造函数给完善一下吧*/
-	Transport(const City&src, const City&dest, vehicle means, int startTime, int endTime)
+	Transport(const City& src, const City& dest, vehicle means, int startTime, int endTime)
 		:m_srcCity(src), m_destCity(dest), m_means(means),
 		m_startTime(startTime), m_endTime(endTime) {}
 
@@ -83,7 +84,7 @@ public:
 	~TransSystem();
 	/*
 		Discription:		根据随机生成从A-B城市某一类型的直达航班
-		Params:	
+		Params:
 			int interval	发车间隔
 			int distTimes	该交通工具花费的时间是distMap中标注的多少倍
 			City src		源城市
@@ -92,15 +93,13 @@ public:
 	void GenRandTransport(vehicle means, int srcIndex, int destIndex);
 
 private:
-	vector<TransNode*> m_timeTable;	/*链表数组,a[i]为第i时刻出发的所有车次*/
-	vector<vector<char>> m_transMap;/*交通方式表*/
-	vector<vector<int>> m_distMap;	/*距离表,表示乘坐飞机的时间,乘坐火车,汽车时间分别为飞机*/
-	vector<City> m_cityList;		/*城市与编号对应表*/
+	vector<vector<vector<char>>> m_timeTable;	/*三维数组,表示两个地点之间24小时的所有航班*/
+	vector<vector<char>> m_transMap;			/*交通方式表,其实timeTable就是这个表的扩展,设置多一个是为了人工输入少一点*/
+	vector<vector<int>> m_distMap;				/*距离表,表示乘坐飞机的时间,乘坐火车,汽车时间分别为飞机*/
+	vector<City> m_cityList;					/*城市与编号对应表*/
 
 	static const unsigned char HAS_PLANE = 4;
 	static const unsigned char HAS_TRAIN = 2;
 	static const unsigned char HAS_BUS = 1;
 
 };
-
-
