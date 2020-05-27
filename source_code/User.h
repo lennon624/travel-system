@@ -9,6 +9,7 @@
 #include<vector>
 #include"Transport.h"
 using namespace std;
+#define DEFAULT_CITY 0
 
 /*
 	Discription:旅客状态类型
@@ -26,7 +27,7 @@ public:
 	typedef enum { on, suspend, stay }status;
 	static vector<string>status_name;
 
-	User();
+	User(const string&name, const City&city);
 	~User();
 	
 	const string& getName() const { return m_name; }
@@ -41,9 +42,9 @@ public:
 
 private:
 
-	string m_name;
-	status m_status;
-	City m_city;
+	string m_name;				/*名字*/
+	status m_status;			/*当前状态*/
+	City m_city;				/*当前所在城市*/
 	int m_planIndex;			/*当前进行的行程在计划中的位置*/
 	vector<Transport*> m_plan;	/*当前选择的出行计划,仅存指针,不负责释放,负责释放的人要小心*/
 

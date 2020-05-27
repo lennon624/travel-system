@@ -9,7 +9,8 @@
 vector<string> User::status_name = { "on","suspend","stay" };
 
 
-User::User() {
+User::User(const string& name, const City& city)
+	:m_name(name),m_city(city){
 
 }
 
@@ -29,17 +30,17 @@ void User::UpdateInfo(int time) {
 	{
 	case stay:
 		break;
-	case suspend:
-		if (time >= m_plan.at(m_planIndex)->startTime) {
+	case suspend:	
+		if (time >= m_plan.at(m_planIndex)->m_startTime) {
 			m_status = on;
 		}
 		break;
 	case on:
-		if (time >= m_plan.at(m_planIndex)->endTime) {
+		if (time >= m_plan.at(m_planIndex)->m_endTime) {
 			/*结束一段transport*/
 			m_planIndex++;
 			/*更新所在城市*/
-			m_city = m_plan.at(m_planIndex)->destCity;
+			m_city = m_plan.at(m_planIndex)->m_destCity;
 			/*判断是否结束一段plan*/
 			m_status = m_planIndex >= m_plan.size() ?
 				stay : suspend;
