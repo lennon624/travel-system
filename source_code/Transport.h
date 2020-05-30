@@ -13,7 +13,7 @@ using namespace std;
 #define MAX_TIME	24
 #define CITY_COUNT	4
 
-typedef enum { bus, train, plane } vehicle;
+enum class vehicle { bus = 0, train = 1, plane = 2 };
 
 /*
 	Discription:	交通工具属性
@@ -26,7 +26,7 @@ struct VehAttr {
 };
 
 /*声明所有交通工具的属性*/
-static const vector<VehAttr> vehAttrs;
+extern const vector<VehAttr> vehAttrs;
 
 /*
 	Discription:	城市信息

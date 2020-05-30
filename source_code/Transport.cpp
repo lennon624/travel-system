@@ -8,7 +8,7 @@
 
 
  /*初始化定义所有交通工具的属性*/
-static const vector<VehAttr>vehAttrs(
+const vector<VehAttr>vehAttrs(
 	/*与enum的顺序对应*/
 	{ {"Bus",2,4},{"Train",4,2 },{"Plane",6,1} }
 );
@@ -22,7 +22,7 @@ TransSystem::TransSystem()
 	m_distMap(CITY_COUNT, vector<int>(CITY_COUNT)),		/*距离图*/
 	m_timeTable(CITY_COUNT, vector<vector<char>>(CITY_COUNT, vector<char>(MAX_TIME)))/*三维的时间表*/
 {
-	
+
 	/*确定交通方式图*/
 	m_transMap[0][1] = HAS_PLANE;			/*Beijing-Guangzhou*/
 	m_transMap[1][0] = HAS_PLANE;
@@ -49,17 +49,17 @@ TransSystem::TransSystem()
 	for (int src = 0; src < m_transMap.size(); ++src) {
 		for (int dest = 0; dest < m_transMap[0].size(); ++dest) {
 			if (m_transMap[src][dest] & HAS_PLANE) {	/*有飞机*/
-				GenRandTransport(plane, src, dest);
+				GenRandTransport(vehicle::plane, src, dest);
 			}
 			if (m_transMap[src][dest] & HAS_TRAIN) {	/*有火车*/
-				GenRandTransport(train, src, dest);
+				GenRandTransport(vehicle:: train, src, dest);
 			}
 			if (m_transMap[src][dest] & HAS_BUS) {		/*有汽车*/
-				GenRandTransport(bus, src, dest);
+				GenRandTransport(vehicle::bus, src, dest);
 			}
 		}
 	}
-	
+
 	/*关键来了,如何在下单的时候找出最佳路径,并为用户构建一个plan呢??让我们拭目以待*/
 }
 TransSystem::~TransSystem() {
@@ -69,7 +69,7 @@ TransSystem::~TransSystem() {
 
 void TransSystem::GenRandTransport(vehicle means, int srcIndex, int destIndex) {
 	srand((int)time(0));												/*设定随机种子*/
-	const VehAttr& attr = vehAttrs[means];								/*提取该交通工具的属性*/
+	const VehAttr& attr = vehAttrs[static_cast<int>(means)];								/*提取该交通工具的属性*/
 	int timeCost = m_distMap[srcIndex][destIndex] * attr.m_distTimes;	/*乘坐该工具需要的时间*/
 	//int startTime = rand() % attr.m_interval;							/*随即设定第一个起始时间*/
 	for (int startTime = rand() % attr.m_interval; startTime < MAX_TIME; startTime += timeCost) {

@@ -24,7 +24,7 @@ class User
 {
 public:
 	/*status在类内声明,表示这是用户的status*/
-	typedef enum { on, suspend, stay }status;
+	enum class status { on = 0, suspend = 1, stay = 2 };
 	static vector<string>status_name;
 
 	User(const string&name, const City&city);
