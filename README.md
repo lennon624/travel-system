@@ -9,3 +9,21 @@
 * beijing guangzhou 飞机
 * beijing wuhan     火车 汽车
 * 记得在堆区分配transportSystem,不然会炸裂的
+* extern全局变量 const vector< VehAttr >vehAttrs,定义了所有交通工具的属性。
+* Transport是一次交通,从一个点到一个点的一次交通信息。
+* TransSystem是整个系统,包括了城市距离表,城市交通时间表,规定了城市数量和时间。
+
+### User
+* 初始化的时候,设定状态为stay，即停留且无计划。
+* 属性包括名字，状态，城市，当前行程在计划中的位置，出行计划表。
+* UpdateInfo(time) 根据当前时间更新信息，包括乘客状态,当前行程，当前城市等等。
+* Updateplan(...) ,用户选定计划时调用该函数。
+
+### Vehicle
+* Vehicle::Type可以指定交通方式
+* Vehicle::GetAttribute( VeHicle :: Type)可以获取该交通方式的特性
+* Type可以作与运算
+
+### TransSystem
+* 三个表，分别表示两点之间的距离表，交通方式表，交通时间表。
+* 

@@ -6,6 +6,7 @@
  *******************************************/
 #include "MainWindow.h"
 #include <QtWidgets/QApplication>
+#include <QPushbutton>
 
 int main(int argc, char *argv[])
 {

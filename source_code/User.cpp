@@ -10,8 +10,8 @@ vector<string> User::status_name = { "on","suspend","stay" };
 
 
 User::User(const string& name, const City& city)
-	:m_name(name),m_city(city){
-
+	:m_name(name), m_city(city), m_status(status::stay), m_planIndex(0) {
+	
 }
 
 User::~User() {
@@ -19,7 +19,7 @@ User::~User() {
 }
 
 void User::UpdatePlan(const vector<Transport*>& plan) {
-	m_status = status::suspend;
+	m_status = status::suspend;	/*将用户状态更新到出行中*/
 	m_planIndex = 0;
 	m_plan = plan;
 }

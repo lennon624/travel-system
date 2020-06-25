@@ -13,7 +13,7 @@ using namespace std;
 
 /*
 	Discription:旅客状态类型
-	enum:	
+	enum:
 		on		正在乘坐交通工具
 		suspend 正在某个城市短暂停留等待下一个航班
 		stay	正在某个城市停留，没有出行计划
@@ -27,13 +27,13 @@ public:
 	enum class status { on = 0, suspend = 1, stay = 2 };
 	static vector<string>status_name;
 
-	User(const string&name, const City&city);
+	User(const string& name, const City& city);
 	~User();
-	
+
 	const string& getName() const { return m_name; }
 	void setName(const string& name) { m_name = name; }
 	void setCity(const City& city) { m_city = city; }
-	
+
 	/*更新新的行程*/
 	void UpdatePlan(const vector<Transport*>& plan);
 
@@ -47,6 +47,6 @@ private:
 	City m_city;				/*当前所在城市*/
 	int m_planIndex;			/*当前进行的行程在计划中的位置*/
 	vector<Transport*> m_plan;	/*当前选择的出行计划,仅存指针,不负责释放,负责释放的人要小心*/
-
+	
 };
 
