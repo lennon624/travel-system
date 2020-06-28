@@ -101,6 +101,7 @@ void TransSystem::GenRandTransport(Vehicle::Type means, int srcIndex, int destIn
 	//int startTime = rand() % attr.m_interval;							/*随即设定第一个起始时间*/
 	for (int startTime = rand() % attr.m_interval; startTime < MAX_TIME; startTime += timeCost) {
 		/*将该班次加入时间表中*/
-		m_timeTable[srcIndex][destIndex][startTime] |= static_cast<unsigned char>(means);
+		m_timeTable[srcIndex][destIndex][startTime] |= means;
 	}
 }
+
