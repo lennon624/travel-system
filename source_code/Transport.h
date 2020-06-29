@@ -65,6 +65,9 @@ struct City {
 	float m_risk;		/*城市风险指数*/
 	City(const string& cityName, float riskPoint)
 		:m_name(cityName), m_risk(riskPoint) {}
+
+	//默认构造
+	City() :m_name("Beijing"), m_risk(1.0) {}
 };
 
 /*
@@ -77,12 +80,15 @@ struct Transport
 	Transport(const City& src, const City& dest, Vehicle::Type means, int startTime, int endTime)
 		:m_srcCity(src), m_destCity(dest), m_means(means),
 		m_startTime(startTime), m_endTime(endTime) {}
+	
+	//默认构造
+	Transport() :m_means(Vehicle::bus), m_startTime(0), m_endTime(0) {}
 
 	//int m_id;				/*这个车次的ID,从0开始*/
 
 	City m_srcCity;
 	City m_destCity;
-	Vehicle::Type m_means;		/*交通方式*/
+	Vehicle::Type m_means;	/*交通方式*/
 	int m_startTime;		/*出发时间*/
 	int m_endTime;			/*到达时间*/
 

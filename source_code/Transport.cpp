@@ -26,18 +26,18 @@ Vehicle::Attribute Vehicle::GetAttribute(Vehicle::Type type) {
 	switch (type)
 	{
 	case Vehicle::bus:
-		return { "Bus",2,4 };
+		return { "BUS",2,4 };
 		break;
 	case Vehicle::train:
-		return { "Train",4,2 };
+		return { "TRAIN",4,2 };
 		break;
 	case Vehicle::plane:
-		return { "Plane",6,1 };
+		return { "PLANE",6,1 };
 		break;
 	default:
 		break;
 	}
-	return { "None", 0, 0 };
+	return { "NONE", 0, 0 };
 }
 
 TransSystem::TransSystem()

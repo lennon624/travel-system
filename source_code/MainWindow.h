@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
+#include <QListWidget>
+#include "TransportFrame.h"
 #include "ui_MainWindow.h"
 
 class MainWindow : public QMainWindow

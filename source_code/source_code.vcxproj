@@ -83,15 +83,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Transport.cpp" />
+    <ClCompile Include="TransportFrame.cpp" />
     <ClCompile Include="User.cpp" />
     <QtRcc Include="MainWindow.qrc" />
     <QtUic Include="MainWindow.ui" />
     <QtMoc Include="MainWindow.h" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="TransportFrame.ui" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Transport.h" />
+    <QtMoc Include="TransportFrame.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>
   <ItemGroup>
