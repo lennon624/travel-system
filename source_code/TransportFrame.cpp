@@ -17,6 +17,7 @@ TransportFrame::TransportFrame(const Transport& trans, QWidget* parent)
 TransportFrame::~TransportFrame()
 {
 	delete ui;
+	qDebug() << "tf deleted";
 }
 
 /*

@@ -18,7 +18,7 @@ User::~User() {
 
 }
 
-void User::UpdatePlan(const vector<Transport*>& plan) {
+void User::UpdatePlan(const vector<Transport>& plan) {
 	m_status = status::suspend;	/*将用户状态更新到出行中*/
 	m_planIndex = 0;
 	m_plan = plan;
@@ -31,16 +31,16 @@ void User::UpdateInfo(int time) {
 	case status::stay:
 		break;
 	case status::suspend:	
-		if (time >= m_plan.at(m_planIndex)->m_startTime) {
+		if (time >= m_plan.at(m_planIndex).m_startTime) {
 			m_status = status::on;
 		}
 		break;
 	case status::on:
-		if (time >= m_plan.at(m_planIndex)->m_endTime) {
+		if (time >= m_plan.at(m_planIndex).m_endTime) {
 			/*结束一段transport*/
 			m_planIndex++;
 			/*更新所在城市*/
-			m_city = m_plan.at(m_planIndex)->m_destCity;
+			m_city = m_plan.at(m_planIndex).m_destCity;
 			/*判断是否结束一段plan*/
 			m_status = m_planIndex >= m_plan.size() ?
 				status::stay : status::suspend;

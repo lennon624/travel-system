@@ -42,7 +42,7 @@ Vehicle::Attribute Vehicle::GetAttribute(Vehicle::Type type) {
 
 TransSystem::TransSystem()
 	:m_cityList(										/*城市列表*/
-		{ {"Beijing",0.9},{"Guangzhou",0.9},{"Wuhan",0.9},
+		{ {"Beijing",0.9},{"Guangzhou",0.7},{"Wuhan",0.9},
 		{"ShenZhen",0.5}/*,{"Tianjin",0.5},{"Shanghai",0.5},
 		{"Xinjiang",0.2},{"Xiamen",0.2},{"Sichuan",0.2},{ "Guilin",0.2 }*/ }),
 	m_transMap(CITY_COUNT, vector<Vehicle::Type>(CITY_COUNT)),	/*交通方式图*/

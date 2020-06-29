@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QFrame>
+#include <QDebug>
 #include "Transport.h"
 namespace Ui { class TransportFrame; };
 

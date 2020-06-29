@@ -60,6 +60,8 @@ private:
 	Creation Date:	2020/5/26
 */
 
+
+
 struct City {
 	string m_name;		/*城市名称*/
 	float m_risk;		/*城市风险指数*/
@@ -86,7 +88,7 @@ struct Transport
 
 	//int m_id;				/*这个车次的ID,从0开始*/
 
-	City m_srcCity;
+	City m_srcCity;			
 	City m_destCity;
 	Vehicle::Type m_means;	/*交通方式*/
 	int m_startTime;		/*出发时间*/
@@ -125,6 +127,8 @@ public:
 			City dest		目的城市
 	*/
 	void GenRandTransport(Vehicle::Type means, int srcIndex, int destIndex);
+
+	const vector<City>& GetCityList()const { return m_cityList; }
 
 private:
 	vector<vector<vector<Vehicle::Type>>> m_timeTable;	/*三维数组,表示两个地点之间24小时的所有航班*/

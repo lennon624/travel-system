@@ -35,7 +35,7 @@ public:
 	void setCity(const City& city) { m_city = city; }
 
 	/*更新新的行程*/
-	void UpdatePlan(const vector<Transport*>& plan);
+	void UpdatePlan(const vector<Transport>& plan);
 
 	/*更新信息,通过m_plan更新状态和位置*/
 	void UpdateInfo(int time);
@@ -46,7 +46,7 @@ private:
 	status m_status;			/*当前状态*/
 	City m_city;				/*当前所在城市*/
 	int m_planIndex;			/*当前进行的行程在计划中的位置*/
-	vector<Transport*> m_plan;	/*当前选择的出行计划,仅存指针,不负责释放,负责释放的人要小心*/
+	vector<Transport> m_plan;	/*当前选择的出行计划直接存transport,避免回收问题*/
 	
 };
 
