@@ -22,11 +22,17 @@ public:
 
 private:
     Ui::MainWindowClass ui;
+
+    /*×´Ì¬À¸µÄ±êÇ©*/
+    QLabel* currSrcCity;
+    QLabel* currDestCity;
+    QProgressBar* currProgress;
+
     User* user;
     TransSystem* sys;
     int gTime;
 
 	void SetCityList(QComboBox* comboBox, const vector<City>& listCity);
     void SetTransList(QListWidget* listWidget, const vector<Transport>& listTrans);
-
+    void UpdateStatusBar();
 };

@@ -25,19 +25,21 @@ class User
 public:
 	/*status在类内声明,表示这是用户的status*/
 	enum class status { on = 0, suspend = 1, stay = 2 };
-	static vector<string>status_name;
 
 	User(const string& name, const City& city);
 	~User();
 
-	const string& getName() const { return m_name; }
-	void setName(const string& name) { m_name = name; }
-	void setCity(const City& city) { m_city = city; }
+	const string& GetName() const { return m_name; }
+	const string GetStatusName ()const;
+	const User::status GetStatus()const { return m_status; }
+	const City& GetCity() const { return m_city; }
 
-	/*更新新的行程*/
+
+	void SetName(const string& name) { m_name = name; }
+	void SetCity(const City& city) { m_city = city; }
+
 	void UpdatePlan(const vector<Transport>& plan);
 
-	/*更新信息,通过m_plan更新状态和位置*/
 	void UpdateInfo(int time);
 
 private:

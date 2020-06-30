@@ -61,13 +61,21 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="Diffnes.qss">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="MainWindow.ui">
-      <Filter>Resource Files</Filter>
+      <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="TransportFrame.ui">
-      <Filter>Resource Files</Filter>
+      <Filter>Form Files</Filter>
     </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="MONACO.TTF">
+      <Filter>Resource Files</Filter>
+    </Font>
   </ItemGroup>
 </Project>

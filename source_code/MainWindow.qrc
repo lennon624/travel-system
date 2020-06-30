@@ -1,4 +1,6 @@
 <RCC>
-    <qresource prefix="MainWindow">
+    <qresource prefix="/">
+        <file>Diffnes.qss</file>
+        <file>MONACO.TTF</file>
     </qresource>
 </RCC>

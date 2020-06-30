@@ -41,6 +41,8 @@ public:
 	static const Type bus = 0x01;
 	static const Type train = 0x02;
 	static const Type plane = 0x04;
+
+	static const Type all = bus | train | plane;
 	
 	struct Attribute {
 		string  name;
@@ -49,7 +51,8 @@ public:
 	};
 	
 	//获取属性,返回Attribute
-	static Attribute GetAttribute(Type);
+	static const Vehicle::Attribute GetAttribute(Type);
+
 
 private:
 
@@ -118,17 +121,12 @@ public:
 	TransSystem();
 	~TransSystem();
 
-	/*
-		Discription:		根据随机生成从A-B城市某一类型的直达航班
-		Params:
-			int interval	发车间隔
-			int distTimes	该交通工具花费的时间是distMap中标注的多少倍
-			City src		源城市
-			City dest		目的城市
-	*/
-	void GenRandTransport(Vehicle::Type means, int srcIndex, int destIndex);
+	
 
 	const vector<City>& GetCityList()const { return m_cityList; }
+
+	const vector<Transport> GetTransList(int srcIndex, int destIndex, Vehicle::Type means);
+
 
 private:
 	vector<vector<vector<Vehicle::Type>>> m_timeTable;	/*三维数组,表示两个地点之间24小时的所有航班*/
@@ -144,4 +142,9 @@ private:
 	/*全局变量,一天24小时以及城市数量*/
 	static const int MAX_TIME = 24;
 	static const int CITY_COUNT = 4;
+
+
+	void GenRandTransports(Vehicle::Type means, int srcIndex, int destIndex);
+
+	const Transport GenTransport(int startTime, Vehicle::Type means, int srcIndex, int destIndex) const;
 };

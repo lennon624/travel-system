@@ -8,32 +8,29 @@ MainWindow::MainWindow(QWidget* parent)
 {
 	/*初始化ui界面*/
 	ui.setupUi(this);
+	
 	/*添加状态栏标签*/
-	QProgressBar* progress = new QProgressBar(this);
-	progress->setValue(50);
-	ui.statusBar->addWidget(new QLabel("text", this));
-	ui.statusBar->addWidget(progress);
-	ui.statusBar->addWidget(new QLabel("text", this));
+	currProgress = new QProgressBar(this);
+	currSrcCity = new QLabel(this);
+	currDestCity = new QLabel(this);
+
+	ui.statusBar->addPermanentWidget(currSrcCity);
+	ui.statusBar->addPermanentWidget(currProgress);
+	ui.statusBar->addPermanentWidget(currDestCity);
 
 	
 
 	/*初始化所有页面*/
+	
+	/*初始化状态栏标签*/
+	UpdateStatusBar();
+
 	/*初始化城市列表*/  /*TODO: 改用combo box*/
 	/*SetCityList(ui.listWidget_src, sys->GetCityList());
 	SetCityList(ui.listWidget_dest, sys->GetCityList());*/
 	SetCityList(ui.combo_srcCity, sys->GetCityList());
 	SetCityList(ui.combo_destCity, sys->GetCityList());
-
-	/*初始化所有车次列表*/
-	vector<Transport> v({ Transport(),Transport() ,Transport() ,Transport() ,Transport() ,Transport()
-		,Transport() ,Transport() ,Transport() ,Transport() ,Transport() });
-	SetTransList(ui.listWidget_trans,v);
-
-	/*TransportFrame* tFrame = new TransportFrame(Transport(), ui.listWidget_trans);
-	QListWidgetItem* item = new QListWidgetItem(ui.listWidget_trans);
-	ui.listWidget_trans->setResizeMode(QListView::ResizeMode::Adjust);
-	item->setSizeHint(tFrame->size());*/
-	//ui.listWidget_trans->setItemWidget(item, tFrame);
+	SetCityList(ui.combo_destTravel, sys->GetCityList());
 	
 
 	/*处理切换页面事件*/
@@ -57,14 +54,27 @@ MainWindow::MainWindow(QWidget* parent)
 	//	qDebug() << QString::fromStdString(sys->GetCityList()[ui.listWidget_src->currentRow()].m_name);
 	//	//更新这两个城市之间的车次 setTransList
 	//	});
-	connect(ui.combo_destCity, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
-		qDebug() << QString::fromStdString(sys->GetCityList()[index].m_name);
-		});
-	connect(ui.combo_srcCity, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
-		qDebug() << QString::fromStdString(sys->GetCityList()[index].m_name);
-		ui.combo_srcCity->setDisabled(true);
-		});
 	
+	/*处理起始城市更换事件*/
+	connect(ui.combo_srcCity, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int srcIndex) {
+		qDebug() << QString::fromStdString(sys->GetCityList()[srcIndex].m_name);
+
+		/*TODO: 判断用户选择的交通方式*/
+		
+		int destIndex = ui.combo_destCity->currentIndex();/*获取起始城市索引*/
+		SetTransList(ui.listWidget_trans, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
+		});
+
+	/*处理终点城市更换事件*/
+	connect(ui.combo_destCity, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int destIndex) {
+		qDebug() << QString::fromStdString(sys->GetCityList()[destIndex].m_name);
+
+		/*TODO: 判断用户选择的交通方式*/
+
+		int srcIndex = ui.combo_srcCity->currentIndex();/*获取起始城市索引*/
+		SetTransList(ui.listWidget_trans, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
+		});
+
 }
 
 MainWindow::~MainWindow() {
@@ -92,4 +102,15 @@ void MainWindow::SetTransList(QListWidget* listWidget, const vector<Transport>& 
 		listWidget->setItemWidget(item, f);
 	}
 	//connect重连
+}
+
+void MainWindow::UpdateStatusBar()
+{
+	if (User::status::stay == user->GetStatus()) {
+		currProgress->setDisabled(true);
+		currProgress->setValue(20);
+		currDestCity->setText("NONE");
+		currSrcCity->setText(QString::fromStdString(user->GetCity().m_name).toUpper());
+		
+	}
 }
