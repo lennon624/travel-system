@@ -53,7 +53,6 @@ public:
 	//获取属性,返回Attribute
 	static const Vehicle::Attribute GetAttribute(Type);
 
-
 private:
 
 };
@@ -122,10 +121,13 @@ public:
 	~TransSystem();
 
 	
-
+	int GetTime()const { return m_time; }
 	const vector<City>& GetCityList()const { return m_cityList; }
-
 	const vector<Transport> GetTransList(int srcIndex, int destIndex, Vehicle::Type means);
+
+	void SetTimeUp() { m_time = (m_time + 1) % MAX_TIME;  }
+
+	static const int CountTime(int startTime, int endTime);
 
 
 private:
@@ -133,7 +135,7 @@ private:
 	vector<vector<Vehicle::Type>> m_transMap;	/*交通方式表,表示两点之间是否有航班*/
 	vector<vector<int>> m_distMap;				/*距离表,表示乘坐飞机的时间,乘坐火车,汽车时间分别为飞机*/
 	vector<City> m_cityList;					/*城市与编号对应表*/
-
+	int m_time;									/*当前时间*/
 	///*定义各种交通方式的标志,用二进制的一个位表示*/
 	//static const unsigned char HAS_PLANE = 4;
 	//static const unsigned char HAS_TRAIN = 2;

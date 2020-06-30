@@ -40,8 +40,11 @@ const Vehicle::Attribute Vehicle::GetAttribute(Vehicle::Type type) {
 	return { "NONE", 0, 0 };
 }
 
+
+
 TransSystem::TransSystem()
-	:m_cityList(										/*城市列表*/
+	:m_time(0),/*时间为0*/
+	m_cityList(										/*城市列表*/
 		{ {"Beijing",0.9},{"Guangzhou",0.7},{"Wuhan",0.9},
 		{"ShenZhen",0.5}/*,{"Tianjin",0.5},{"Shanghai",0.5},
 		{"Xinjiang",0.2},{"Xiamen",0.2},{"Sichuan",0.2},{ "Guilin",0.2 }*/ }),
@@ -163,5 +166,14 @@ const vector<Transport> TransSystem::GetTransList(int srcIndex, int destIndex, V
 		}
 	}
 	return tList;
+}
+/*
+工具函数，用来计算两个时刻之间的总时间
+TODO: 现在的算法限制在两个时刻的总时间<23小时
+*/
+const int TransSystem::CountTime(int startTime, int endTime)
+{
+	return (endTime >= startTime) ? 
+		(endTime - startTime) : (endTime + MAX_TIME - startTime);
 }
 

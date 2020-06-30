@@ -33,6 +33,7 @@ public:
 	const string GetStatusName ()const;
 	const User::status GetStatus()const { return m_status; }
 	const City& GetCity() const { return m_city; }
+	const Transport& GetTransport()const { return m_plan[m_planIndex]; }
 
 
 	void SetName(const string& name) { m_name = name; }
@@ -41,6 +42,7 @@ public:
 	void UpdatePlan(const vector<Transport>& plan);
 
 	void UpdateInfo(int time);
+	
 
 private:
 

@@ -43,7 +43,7 @@ void User::UpdatePlan(const vector<Transport>& plan) {
 	m_planIndex = 0;
 	m_plan = plan;
 }
-
+/*根据当前的时刻更新user状态,注意!,只能在正确的时刻更新，一旦错过了某个时刻就会有bug*/
 void User::UpdateInfo(int time) {
 
 	switch (m_status)

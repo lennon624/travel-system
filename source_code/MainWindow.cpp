@@ -20,6 +20,18 @@ MainWindow::MainWindow(QWidget* parent)
 
 	
 
+	/*debug 设置user状态*/
+	user->UpdatePlan({ Transport(
+		sys->GetCityList()[0],
+		sys->GetCityList()[2],
+		Vehicle::bus,0,10) }); /*从城市0到城市2,  0:00到10:00*/
+	/*debug 把系统时间调整到3*/
+	user->UpdateInfo(sys->GetTime());
+	sys->SetTimeUp();
+	sys->SetTimeUp();
+	sys->SetTimeUp();
+
+
 	/*初始化所有页面*/
 	
 	/*初始化状态栏标签*/
@@ -106,11 +118,70 @@ void MainWindow::SetTransList(QListWidget* listWidget, const vector<Transport>& 
 
 void MainWindow::UpdateStatusBar()
 {
-	if (User::status::stay == user->GetStatus()) {
+	
+	if (User::status::on == user->GetStatus()) {
+		/*计算并设置当前transport的进度 */
+		currProgress->setDisabled(false);
+		/*设置进度*/
+		int totalTime = TransSystem::CountTime(
+			user->GetTransport().m_startTime,
+			user->GetTransport().m_endTime);
+		int pastTime = TransSystem::CountTime(
+			user->GetTransport().m_startTime,
+			sys->GetTime()
+		);
+		currProgress->setValue(pastTime * 100 / totalTime);
+
+		/*设置起始和目的城市*/
+		currSrcCity->setText(
+			QString::fromStdString(user->GetTransport().m_srcCity.m_name)
+		);
+		currDestCity->setText(
+			QString::fromStdString(user->GetTransport().m_destCity.m_name)
+		);
+	} else if (User::status::suspend == user->GetStatus()){
+		/*设置当前transport的进度为0*/
+		currProgress->setDisabled(false);
+		currProgress->setValue(0);
+
+		/*设置起始和目的城市*/
+		currSrcCity->setText(
+			QString::fromStdString(user->GetTransport().m_srcCity.m_name)
+		);
+		currDestCity->setText(
+			QString::fromStdString(user->GetTransport().m_destCity.m_name)
+		);
+	} else if (User::status::stay == user->GetStatus()) {
+		/*设置当前transport的进度为0且禁用进度条*/
 		currProgress->setDisabled(true);
-		currProgress->setValue(20);
+		currProgress->setValue(0);
+
 		currDestCity->setText("NONE");
 		currSrcCity->setText(QString::fromStdString(user->GetCity().m_name).toUpper());
 		
+
 	}
+	
+	//switch (user->GetStatus())
+	//{
+
+	//case User::status::on:		/*user正在上路*/
+
+	//	
+	//	break;
+
+
+	//case User::status::suspend:	/*user正在中转*/
+
+	//	
+	//	break;
+
+
+	//case User::status::stay:	/*user没有计划*/
+	//	
+	//	break;
+	//default:
+	//	break;
+	//}
+
 }
