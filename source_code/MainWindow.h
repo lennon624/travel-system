@@ -3,6 +3,8 @@
 #include <QtWidgets/QMainWindow>
 #include <QListWidget>
 #include <vector>
+#include <QAction>
+#include <QProgressBar>
 #include "Transport.h"
 #include "TransportFrame.h"
 #include "ui_MainWindow.h"
@@ -24,7 +26,7 @@ private:
     TransSystem* sys;
     int gTime;
 
-	void SetCityList(QListWidget* listWidget, const vector<City>& listCity);
+	void SetCityList(QComboBox* comboBox, const vector<City>& listCity);
     void SetTransList(QListWidget* listWidget, const vector<Transport>& listTrans);
 
 };
