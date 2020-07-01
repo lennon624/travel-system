@@ -9,7 +9,7 @@
 
 
 User::User(const string& name, const City& city)
-	:m_name(name), m_city(city), m_status(status::stay), m_planIndex(0) {
+	:m_name(name), m_city(city), m_status(status::stay), m_planIndex(0), m_newPlanFlag(false) {
 	
 }
 
@@ -44,20 +44,25 @@ void User::UpdatePlan(const vector<Transport>& plan) {
 	m_plan = plan;
 }
 /*根据当前的时刻更新user状态,注意!,只能在正确的时刻更新，一旦错过了某个时刻就会有bug*/
-void User::UpdateInfo(int time) {
+void User::UpdateInfo(int time, int day) {
 
 	switch (m_status)
 	{
 	case status::stay:
+		/*用户状态为stay的时候啥都不干,等待updatePlan将状态转换为suspend*/
 		break;
-	case status::suspend:	
-		if (time == m_plan.at(m_planIndex).m_startTime) {
+	case status::suspend:/*时间超过下一个transport的开始时间后*/
+		if (day > m_plan.at(m_planIndex).m_startDay 
+			|| (day == m_plan.at(m_planIndex).m_startDay 
+				&& time >= m_plan.at(m_planIndex).m_startTime)) {
 			m_status = status::on;
 		}
 		break;
 	case status::on:
 		/*TODO: 需要完善支持一次行程超过24小时的时间机制,所有的==判断都要改成更严谨的范围判断*/
-		if (time == m_plan.at(m_planIndex).m_endTime) {
+		if (day > m_plan.at(m_planIndex).m_endDay
+			|| (day == m_plan.at(m_planIndex).m_endDay
+				&& time >= m_plan.at(m_planIndex).m_endTime)) {
 			
 			/*更新所在城市,所在城市为触发的城市*/
 			m_city = m_plan.at(m_planIndex).m_destCity;
@@ -68,7 +73,7 @@ void User::UpdateInfo(int time) {
 				status::stay : status::suspend;
 
 			/*再更新一次,如果当前时刻有发车则立刻出发*/
-			UpdateInfo(time);
+			UpdateInfo(time, day);
 		}
 		break;
 	default:

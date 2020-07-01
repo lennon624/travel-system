@@ -81,12 +81,13 @@ struct City {
 struct Transport
 {
 	/*TODO 把各个类的构造函数给完善一下吧*/
-	Transport(const City& src, const City& dest, Vehicle::Type means, int startTime, int endTime)
+	Transport(const City& src, const City& dest, Vehicle::Type means,
+		int startTime, int endTime, int startDay, int endDay)
 		:m_srcCity(src), m_destCity(dest), m_means(means),
-		m_startTime(startTime), m_endTime(endTime) {}
+		m_startTime(startTime), m_endTime(endTime), m_startDay(startDay), m_endDay(endDay) {}
 	
 	//默认构造
-	Transport() :m_means(Vehicle::bus), m_startTime(0), m_endTime(0) {}
+	Transport() :m_means(Vehicle::bus), m_startTime(0), m_endTime(0), m_startDay(0), m_endDay(0) {}
 
 	//int m_id;				/*这个车次的ID,从0开始*/
 
@@ -95,6 +96,8 @@ struct Transport
 	Vehicle::Type m_means;	/*交通方式*/
 	int m_startTime;		/*出发时间*/
 	int m_endTime;			/*到达时间*/
+	int m_startDay;			/*出发日期*/
+	int m_endDay;			/*到达日期*/
 
 };
 
@@ -122,13 +125,14 @@ public:
 
 	
 	int GetTime()const { return m_time; }
+	int GetDay()const { return m_day; }
 	const vector<City>& GetCityList()const { return m_cityList; }
 	const vector<Transport> GetTransList(int srcIndex, int destIndex, Vehicle::Type means);
 
-	void SetTimeUp() { m_time = (m_time + 1) % MAX_TIME;  }
+	void SetTimeUp();
 
 	static const int CountTime(int startTime, int endTime);
-
+	static const int CountTime(int startTime, int endTime, int startDay, int endDay);
 
 private:
 	vector<vector<vector<Vehicle::Type>>> m_timeTable;	/*三维数组,表示两个地点之间24小时的所有航班*/
@@ -136,6 +140,7 @@ private:
 	vector<vector<int>> m_distMap;				/*距离表,表示乘坐飞机的时间,乘坐火车,汽车时间分别为飞机*/
 	vector<City> m_cityList;					/*城市与编号对应表*/
 	int m_time;									/*当前时间*/
+	int m_day;									/*当前日期*/
 	///*定义各种交通方式的标志,用二进制的一个位表示*/
 	//static const unsigned char HAS_PLANE = 4;
 	//static const unsigned char HAS_TRAIN = 2;
@@ -144,9 +149,9 @@ private:
 	/*全局变量,一天24小时以及城市数量*/
 	static const int MAX_TIME = 24;
 	static const int CITY_COUNT = 4;
-
+		
 
 	void GenRandTransports(Vehicle::Type means, int srcIndex, int destIndex);
 
-	const Transport GenTransport(int startTime, Vehicle::Type means, int srcIndex, int destIndex) const;
+	const Transport GenTransport(int startTime, Vehicle::Type means, int srcIndex, int destIndex, int startDay = 0) const;
 };

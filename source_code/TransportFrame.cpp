@@ -37,6 +37,6 @@ void TransportFrame::SetTransport(const Transport& trans, bool refresh)
 	ui->vehicle->setText(QString("<center><span style=\"font-size:18pt;\">%1</span></center>").arg(vName));
 	ui->destCity->setText(QString("<center><span style=\"font-size:10pt;\">%1</span></center>").arg(dName));
 	ui->srcCity->setText(QString("<center><span style=\"font-size:10pt;\">%1</span></center>").arg(sName));
-	ui->destTime->setText(QString("<center><span style=\"font-size:10pt;\">%1:00</span></center>").arg(trans.m_endTime));
 	ui->srcTime->setText(QString("<center><span style=\"font-size:10pt;\">%1:00</span></center>").arg(trans.m_startTime));
+	ui->destTime->setText(QString("<center><span style=\"font-size:10pt;\">%1:00 +%2</span></center>").arg(trans.m_endTime).arg(trans.m_endDay - trans.m_startDay));
 }

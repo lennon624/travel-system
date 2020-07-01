@@ -34,14 +34,16 @@ public:
 	const User::status GetStatus()const { return m_status; }
 	const City& GetCity() const { return m_city; }
 	const Transport& GetTransport()const { return m_plan[m_planIndex]; }
+	const bool HaveNewPlan()const { return m_newPlanFlag; }
 
 
 	void SetName(const string& name) { m_name = name; }
 	void SetCity(const City& city) { m_city = city; }
+	void SetNewPlanFlag(bool flag) { m_newPlanFlag = flag; }
 
 	void UpdatePlan(const vector<Transport>& plan);
 
-	void UpdateInfo(int time);
+	void UpdateInfo(int time, int day);
 	
 
 private:
@@ -51,6 +53,6 @@ private:
 	City m_city;				/*当前所在城市*/
 	int m_planIndex;			/*当前进行的行程在计划中的位置*/
 	vector<Transport> m_plan;	/*当前选择的出行计划直接存transport,避免回收问题*/
-	
+	bool m_newPlanFlag;			/*当前是否申请了新的计划*/
 };
 

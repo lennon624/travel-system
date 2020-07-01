@@ -3,8 +3,9 @@
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent),
 	user(new User("USERNAME", City())),
-	sys(new TransSystem),
-	gTime(0)
+	sys(new TransSystem)
+	/*gTime(0),
+	gDay(0)*/
 {
 	/*初始化ui界面*/
 	ui.setupUi(this);
@@ -13,23 +14,23 @@ MainWindow::MainWindow(QWidget* parent)
 	currProgress = new QProgressBar(this);
 	currSrcCity = new QLabel(this);
 	currDestCity = new QLabel(this);
-
+	currTime = new QLabel(this);
+	currDay = new QLabel(this);
+	currUserStatus = new QLabel(this);
 	ui.statusBar->addPermanentWidget(currSrcCity);
 	ui.statusBar->addPermanentWidget(currProgress);
 	ui.statusBar->addPermanentWidget(currDestCity);
-
-	
+	ui.statusBar->addWidget(currTime);
+	ui.statusBar->addWidget(currDay);
+	ui.statusBar->addWidget(currUserStatus);
 
 	/*debug 设置user状态*/
 	user->UpdatePlan({ Transport(
 		sys->GetCityList()[0],
 		sys->GetCityList()[2],
-		Vehicle::bus,0,10) }); /*从城市0到城市2,  0:00到10:00*/
+		Vehicle::bus,5,10,0,2) }); /*从城市0到城市2,  0:00到10:00*/
 	/*debug 把系统时间调整到3*/
-	user->UpdateInfo(sys->GetTime());
-	sys->SetTimeUp();
-	sys->SetTimeUp();
-	sys->SetTimeUp();
+	user->UpdateInfo(sys->GetTime(),sys->GetDay());
 
 
 	/*初始化所有页面*/
@@ -45,6 +46,13 @@ MainWindow::MainWindow(QWidget* parent)
 	SetCityList(ui.combo_destTravel, sys->GetCityList());
 	
 
+
+
+
+	/*开始工作*/
+	hTimerId = startTimer(MS_PER_H);
+
+	/*处理信号*/
 	/*处理切换页面事件*/
 	connect(ui.btn_pMap, &QPushButton::clicked, [=]() {
 		ui.stackedWidget->setCurrentWidget(ui.page_map);
@@ -66,20 +74,19 @@ MainWindow::MainWindow(QWidget* parent)
 	//	qDebug() << QString::fromStdString(sys->GetCityList()[ui.listWidget_src->currentRow()].m_name);
 	//	//更新这两个城市之间的车次 setTransList
 	//	});
-	
-	/*处理起始城市更换事件*/
+
+	/*处理起始城市更换事件,只能放最后*/
 	connect(ui.combo_srcCity, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int srcIndex) {
-		qDebug() << QString::fromStdString(sys->GetCityList()[srcIndex].m_name);
+		qDebug() << QString::fromStdString(sys->GetCityList().at(srcIndex).m_name);
 
 		/*TODO: 判断用户选择的交通方式*/
-		
+
 		int destIndex = ui.combo_destCity->currentIndex();/*获取起始城市索引*/
 		SetTransList(ui.listWidget_trans, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
 		});
-
 	/*处理终点城市更换事件*/
 	connect(ui.combo_destCity, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int destIndex) {
-		qDebug() << QString::fromStdString(sys->GetCityList()[destIndex].m_name);
+		qDebug() << QString::fromStdString(sys->GetCityList().at(destIndex).m_name);
 
 		/*TODO: 判断用户选择的交通方式*/
 
@@ -87,12 +94,35 @@ MainWindow::MainWindow(QWidget* parent)
 		SetTransList(ui.listWidget_trans, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
 		});
 
+
+
 }
 
 MainWindow::~MainWindow() {
 	delete sys;
 	delete user;
 }
+
+void MainWindow::timerEvent(QTimerEvent* ev)
+{
+	/*处理时钟触发状态*/
+	if (hTimerId == ev->timerId()) {
+		/*更新系统日期*/
+		sys->SetTimeUp();
+		UpdateStatusBar();
+
+		/*更新乘客状态*/
+		if (user->GetStatus() == User::status::stay
+			&& user->HaveNewPlan()) {	/*如果当前没有正在执行的计划且cachePlan有计划时*/
+			user->UpdatePlan(planCache);/*则开始执行缓存的计划*/
+			user->SetNewPlanFlag(false);/*没有newPlan*/
+		}
+		user->UpdateInfo(sys->GetTime(),sys->GetDay());
+		qDebug() << QString::fromStdString(user->GetStatusName());
+	}
+}
+
+
 
 void MainWindow::SetCityList(QComboBox* comboBox, const vector<City>& listCity)
 {
@@ -118,17 +148,22 @@ void MainWindow::SetTransList(QListWidget* listWidget, const vector<Transport>& 
 
 void MainWindow::UpdateStatusBar()
 {
-	
+
+	/*设置进度控件*/
 	if (User::status::on == user->GetStatus()) {
 		/*计算并设置当前transport的进度 */
 		currProgress->setDisabled(false);
 		/*设置进度*/
 		int totalTime = TransSystem::CountTime(
 			user->GetTransport().m_startTime,
-			user->GetTransport().m_endTime);
+			user->GetTransport().m_endTime,
+			user->GetTransport().m_startDay,
+			user->GetTransport().m_endDay);
 		int pastTime = TransSystem::CountTime(
 			user->GetTransport().m_startTime,
-			sys->GetTime()
+			sys->GetTime(),
+			user->GetTransport().m_startDay,
+			sys->GetDay()
 		);
 		currProgress->setValue(pastTime * 100 / totalTime);
 
@@ -158,30 +193,11 @@ void MainWindow::UpdateStatusBar()
 
 		currDestCity->setText("NONE");
 		currSrcCity->setText(QString::fromStdString(user->GetCity().m_name).toUpper());
-		
-
 	}
 	
-	//switch (user->GetStatus())
-	//{
-
-	//case User::status::on:		/*user正在上路*/
-
-	//	
-	//	break;
-
-
-	//case User::status::suspend:	/*user正在中转*/
-
-	//	
-	//	break;
-
-
-	//case User::status::stay:	/*user没有计划*/
-	//	
-	//	break;
-	//default:
-	//	break;
-	//}
+	/*设置日期和时间*/
+	currTime->setText(QString("%1:00").arg(sys->GetTime(), 2, 10, QLatin1Char('0')));
+	currDay->setText(QString("Day %1").arg(sys->GetDay()));
+	currUserStatus->setText(QString(" --- status: %1 --- ").arg(QString::fromStdString(user->GetStatusName())));
 
 }

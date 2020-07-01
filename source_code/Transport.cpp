@@ -44,6 +44,7 @@ const Vehicle::Attribute Vehicle::GetAttribute(Vehicle::Type type) {
 
 TransSystem::TransSystem()
 	:m_time(0),/*时间为0*/
+	m_day(0),
 	m_cityList(										/*城市列表*/
 		{ {"Beijing",0.9},{"Guangzhou",0.7},{"Wuhan",0.9},
 		{"ShenZhen",0.5}/*,{"Tianjin",0.5},{"Shanghai",0.5},
@@ -124,14 +125,16 @@ void TransSystem::GenRandTransports(Vehicle::Type means, int srcIndex, int destI
 		City dest		目的城市
 */
 const Transport TransSystem::GenTransport(
-	int startTime, Vehicle::Type means, int srcIndex, int destIndex) const
+	int startTime, Vehicle::Type means, int srcIndex, int destIndex, int startDay) const
 {
 	/*获取属性*/
 	Vehicle::Attribute attr = Vehicle::GetAttribute(means);
 	/*生成到达时间, TODO: 这里需要添加是否隔天到达的信息*/
-	int endTime = (startTime + attr.m_distTimes * m_distMap[srcIndex][destIndex]) % MAX_TIME;
+	int fullEndTime = (startTime + attr.m_distTimes * m_distMap[srcIndex][destIndex]);
+	int endTime = fullEndTime % MAX_TIME;
+	int endDay = fullEndTime / MAX_TIME + startDay;
 	/*返回这个Transport*/
-	return Transport(m_cityList[srcIndex], m_cityList[destIndex], means, startTime, endTime);
+	return Transport(m_cityList[srcIndex], m_cityList[destIndex], means, startTime, endTime, startDay, endDay);
 }
 
 /*
@@ -167,6 +170,13 @@ const vector<Transport> TransSystem::GetTransList(int srcIndex, int destIndex, V
 	}
 	return tList;
 }
+void TransSystem::SetTimeUp()
+{
+	m_time = (m_time + 1) % MAX_TIME;
+	if (!m_time) {
+		++m_day;
+	}
+}
 /*
 工具函数，用来计算两个时刻之间的总时间
 TODO: 现在的算法限制在两个时刻的总时间<23小时
@@ -175,5 +185,13 @@ const int TransSystem::CountTime(int startTime, int endTime)
 {
 	return (endTime >= startTime) ? 
 		(endTime - startTime) : (endTime + MAX_TIME - startTime);
+}
+
+/*
+工具函数，用来计算两个时刻之间的总时间,将日期也计入考虑之中
+*/
+const int TransSystem::CountTime(int startTime, int endTime, int startDay, int endDay)
+{
+	return (endDay - startDay) * 24 + endTime - startTime;
 }
 

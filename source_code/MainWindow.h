@@ -20,6 +20,8 @@ public:
     MainWindow(QWidget *parent = Q_NULLPTR);
     ~MainWindow();
 
+protected:
+	void timerEvent(QTimerEvent* ev)override;
 private:
     Ui::MainWindowClass ui;
 
@@ -27,10 +29,18 @@ private:
     QLabel* currSrcCity;
     QLabel* currDestCity;
     QProgressBar* currProgress;
+    QLabel* currTime;
+    QLabel* currDay;
+    QLabel* currUserStatus;
 
     User* user;
     TransSystem* sys;
-    int gTime;
+
+    int hTimerId; /*时钟timer的id*/
+    const int MS_PER_H = 200;/*每小时多少毫秒*/
+    vector<Transport> planCache;
+    //int gTime;  /*时间*/
+    //int gDay;   /*日期*/
 
 	void SetCityList(QComboBox* comboBox, const vector<City>& listCity);
     void SetTransList(QListWidget* listWidget, const vector<Transport>& listTrans);
