@@ -29,12 +29,13 @@ public:
 	User(const string& name, const City& city);
 	~User();
 
-	const string& GetName() const { return m_name; }
-	const string GetStatusName ()const;
-	const User::status GetStatus()const { return m_status; }
-	const City& GetCity() const { return m_city; }
-	const Transport& GetTransport()const { return m_plan[m_planIndex]; }
-	const bool HaveNewPlan()const { return m_newPlanFlag; }
+	const string& GetName() const { return m_name; }					/*获取用户名*/
+	const string GetStatusName ()const;									/*获取状态名称*/
+	const User::status GetStatus()const { return m_status; }			/*获取状态*/
+	const City& GetCity() const { return m_city; }						/*获取当前城市或正在离开的城市*/
+	const Transport& GetTransport()const { return m_plan[m_planIndex]; }/*获取当前正在执行的航班*/
+	const vector<Transport>& GetPlan()const { return m_plan; }			/*获取整个计划*/
+	const bool HaveNewPlan()const { return m_newPlanFlag; }				/*查询用户是否有新的计划待接收*/
 
 
 	void SetName(const string& name) { m_name = name; }

@@ -25,10 +25,19 @@ MainWindow::MainWindow(QWidget* parent)
 	ui.statusBar->addWidget(currUserStatus);
 
 	/*debug 设置user状态*/
-	user->UpdatePlan({ Transport(
+	user->UpdatePlan({
+		
+		Transport(
 		sys->GetCityList()[0],
 		sys->GetCityList()[2],
-		Vehicle::bus,5,10,0,2) }); /*从城市0到城市2,  0:00到10:00*/
+		Vehicle::bus,5,10,0,2),
+
+		Transport(
+		sys->GetCityList()[2],
+		sys->GetCityList()[1],
+		Vehicle::bus,0,15,3,5) 
+		}
+	); /*从城市0到城市2,  0:00到10:00*/
 	/*debug 把系统时间调整到3*/
 	user->UpdateInfo(sys->GetTime(),sys->GetDay());
 
@@ -44,10 +53,8 @@ MainWindow::MainWindow(QWidget* parent)
 	SetCityList(ui.combo_srcCity, sys->GetCityList());
 	SetCityList(ui.combo_destCity, sys->GetCityList());
 	SetCityList(ui.combo_destTravel, sys->GetCityList());
+	SetCityList(ui.combo_srcTravel, { user->GetCity() });
 	
-
-
-
 
 	/*开始工作*/
 	hTimerId = startTimer(MS_PER_H);
@@ -75,7 +82,7 @@ MainWindow::MainWindow(QWidget* parent)
 	//	//更新这两个城市之间的车次 setTransList
 	//	});
 
-	/*处理起始城市更换事件,只能放最后*/
+	/*处理timeTable查询页起始城市更换事件,只能放最后*/
 	connect(ui.combo_srcCity, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int srcIndex) {
 		qDebug() << QString::fromStdString(sys->GetCityList().at(srcIndex).m_name);
 
@@ -94,7 +101,8 @@ MainWindow::MainWindow(QWidget* parent)
 		SetTransList(ui.listWidget_trans, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
 		});
 
-
+	connect(ui.btn_planMy, &QPushButton::clicked, [=]() {
+		});
 
 }
 
@@ -109,6 +117,7 @@ void MainWindow::timerEvent(QTimerEvent* ev)
 	if (hTimerId == ev->timerId()) {
 		/*更新系统日期*/
 		sys->SetTimeUp();
+		/*更新状态栏*/
 		UpdateStatusBar();
 
 		/*更新乘客状态*/
@@ -117,8 +126,11 @@ void MainWindow::timerEvent(QTimerEvent* ev)
 			user->UpdatePlan(planCache);/*则开始执行缓存的计划*/
 			user->SetNewPlanFlag(false);/*没有newPlan*/
 		}
-		user->UpdateInfo(sys->GetTime(),sys->GetDay());
+		user->UpdateInfo(sys->GetTime(), sys->GetDay());
 		qDebug() << QString::fromStdString(user->GetStatusName());
+
+		/*更新travel页*/
+		UpdatePageTravel();
 	}
 }
 
@@ -146,6 +158,9 @@ void MainWindow::SetTransList(QListWidget* listWidget, const vector<Transport>& 
 	//connect重连
 }
 
+/*
+	更新状态栏
+*/
 void MainWindow::UpdateStatusBar()
 {
 
@@ -200,4 +215,23 @@ void MainWindow::UpdateStatusBar()
 	currDay->setText(QString("Day %1").arg(sys->GetDay()));
 	currUserStatus->setText(QString(" --- status: %1 --- ").arg(QString::fromStdString(user->GetStatusName())));
 
+}
+
+/*更新travel页*/
+void MainWindow::UpdatePageTravel()
+{
+	/*更新新的旅行计划起始地点的名字 START FROM 下拉框，只提供一个选项(暂时)*/
+	ui.combo_srcTravel->clear();
+	if (User::status::stay == user->GetStatus()) {
+		/*如果用户没有正在旅行,那么下一次旅行的起始地点为用户位置*/
+		qDebug() << QString::fromStdString(user->GetStatusName());
+		ui.combo_srcTravel->addItem(QString::fromStdString(user->GetCity().m_name));
+	} else {
+		/*如果用户正在旅行,那么更新起始地点为当前旅行计划的终点城市*/
+		qDebug() << user->GetPlan().size();
+		City nextSrc = user->GetPlan().at(user->GetPlan().size() - 1).m_destCity;
+		ui.combo_srcTravel->addItem(QString::fromStdString(nextSrc.m_name));
+	}
+
+	/*将日期同步更新(算了不更了)*/
 }

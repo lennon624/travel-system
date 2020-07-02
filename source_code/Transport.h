@@ -173,7 +173,7 @@ private:
 	vector<Transport> a_plan;		/*全局变量,当前遍历的plan数组*/
 	vector<Transport> a_bestPlan;	/*最优解*/
 	//int a_risk;					/*全局变量,当前plan累计的风险*/
-	int a_bestRisk;				/*全局变量,当前最优的plan累计的风险,-1表示还没有最优解*/
+	int a_bestRisk;					/*全局变量,当前最优的plan累计的风险,-1表示还没有最优解*/
 	
 	void a_InitAlgorithm() { a_plan = {}, a_bestPlan = {}, a_bestRisk = -1; }/*初始化算法的全局变量*/
 
