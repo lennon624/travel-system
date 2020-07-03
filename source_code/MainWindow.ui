@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>804</width>
-    <height>737</height>
+    <width>1090</width>
+    <height>918</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -430,6 +430,9 @@
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusBar">
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
    <property name="sizeGripEnabled">
     <bool>false</bool>
    </property>

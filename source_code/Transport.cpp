@@ -137,7 +137,7 @@ const Transport TransSystem::GenTransport(
 	int endTime = fullEndTime % MAX_TIME;
 	int endDay = fullEndTime / MAX_TIME + startDay;
 	/*返回这个Transport*/
-	return Transport(m_cityList[srcIndex], m_cityList[destIndex], means, startTime, endTime, startDay, endDay);
+	return Transport(srcIndex, destIndex, means, startTime, endTime, startDay, endDay);
 }
 
 /*
@@ -253,6 +253,7 @@ bool TransSystem::a_DFS_limTimeEachVehicle(
 	/*******************************************************/
 
 	a_plan.pop_back();/*弹出*/
+	return false;
 
 }
 
@@ -302,7 +303,9 @@ const vector<Transport> TransSystem::FindPlanLimTime(
 	int startTime, int endTime)
 {
 	a_InitAlgorithm();/*初始化全局变量*/
-	a_DFS_limTime(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0);/*初始风险值设为0*/
+	if (CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
+		a_DFS_limTime(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0);/*初始风险值设为0*/
+	}
 	return a_bestPlan;
 }
 
@@ -330,7 +333,6 @@ const int TransSystem::CountTime(int startTime, int endTime, int startDay, int e
 {
 	return (endDay - startDay) * 24 + endTime - startTime;
 }
-
 const bool TransSystem::CompareDateTimeLE(int timeA, int timeB, int dayA, int dayB)
 {
 	return (dayA > dayB || (dayA == dayB && timeA >= timeB));

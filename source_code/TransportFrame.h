@@ -11,11 +11,11 @@ class TransportFrame : public QFrame
 
 public:
 	//TransportFrame(QWidget *parent = Q_NULLPTR);
-	TransportFrame(const Transport& trans, QWidget* parent = Q_NULLPTR);
+	TransportFrame(const Transport& trans, const TransSystem& sys, bool viewTrueDay, QWidget* parent = Q_NULLPTR);
 
 	~TransportFrame();
 
-	void SetTransport(const Transport& trans, bool refresh = true);
+	void SetTransport(const Transport& trans, const TransSystem& sys, bool viewTrueDay, bool refresh = true);
 
 private:
 	Ui::TransportFrame *ui;

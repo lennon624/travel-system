@@ -81,9 +81,9 @@ struct City {
 struct Transport
 {
 	/*TODO 把各个类的构造函数给完善一下吧*/
-	Transport(const City& src, const City& dest, Vehicle::Type means,
+	Transport(int srcIndex, int destIndex, Vehicle::Type means,
 		int startTime, int endTime, int startDay, int endDay)
-		:m_srcCity(src), m_destCity(dest), m_means(means),
+		:m_srcIndex(srcIndex), m_destIndex(destIndex), m_means(means),
 		m_startTime(startTime), m_endTime(endTime), m_startDay(startDay), m_endDay(endDay) {}
 	
 	//默认构造
@@ -91,8 +91,10 @@ struct Transport
 
 	//int m_id;				/*这个车次的ID,从0开始*/
 
-	City m_srcCity;			
-	City m_destCity;
+	//City m_srcCity;			
+	//City m_destCity;
+	int m_srcIndex;			/*起始城市序号*/
+	int m_destIndex;			/*终点城市序号*/
 	Vehicle::Type m_means;	/*交通方式*/
 	int m_startTime;		/*出发时间*/
 	int m_endTime;			/*到达时间*/

@@ -43,7 +43,8 @@ private:
     //int gDay;   /*ÈÕÆÚ*/
 
 	void SetCityList(QComboBox* comboBox, const vector<City>& listCity);
-    void SetTransList(QListWidget* listWidget, const vector<Transport>& listTrans);
+	void SetTransList(QListWidget* listWidget, bool viewTrueDay, const vector<Transport>& listTrans);
     void UpdateStatusBar();
     void UpdatePageTravel();
+    void ShowBestPlan();
 };

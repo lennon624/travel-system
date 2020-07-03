@@ -2,7 +2,7 @@
 
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent),
-	user(new User("USERNAME", City())),
+	user(new User("USERNAME", User::DEFAULT_CITY_INDEX)),
 	sys(new TransSystem)
 	/*gTime(0),
 	gDay(0)*/
@@ -18,7 +18,9 @@ MainWindow::MainWindow(QWidget* parent)
 	currDay = new QLabel(this);
 	currUserStatus = new QLabel(this);
 	ui.statusBar->addPermanentWidget(currSrcCity);
+	ui.statusBar->addPermanentWidget(new QLabel(">>", this));
 	ui.statusBar->addPermanentWidget(currProgress);
+	ui.statusBar->addPermanentWidget(new QLabel(">>", this));
 	ui.statusBar->addPermanentWidget(currDestCity);
 	ui.statusBar->addWidget(currTime);
 	ui.statusBar->addWidget(currDay);
@@ -28,13 +30,13 @@ MainWindow::MainWindow(QWidget* parent)
 	user->UpdatePlan({
 		
 		Transport(
-		sys->GetCityList()[0],
-		sys->GetCityList()[2],
+		0,
+		2,
 		Vehicle::bus,5,10,0,2),
 
 		Transport(
-		sys->GetCityList()[2],
-		sys->GetCityList()[1],
+		2,
+		1,
 		Vehicle::bus,0,15,3,5) 
 		}
 	); /*从城市0到城市2,  0:00到10:00*/
@@ -53,7 +55,7 @@ MainWindow::MainWindow(QWidget* parent)
 	SetCityList(ui.combo_srcCity, sys->GetCityList());
 	SetCityList(ui.combo_destCity, sys->GetCityList());
 	SetCityList(ui.combo_destTravel, sys->GetCityList());
-	SetCityList(ui.combo_srcTravel, { user->GetCity() });
+	SetCityList(ui.combo_srcTravel, { sys->GetCityList().at(user->GetCityIndex()) });
 	
 
 	/*开始工作*/
@@ -84,26 +86,27 @@ MainWindow::MainWindow(QWidget* parent)
 
 	/*处理timeTable查询页起始城市更换事件,只能放最后*/
 	connect(ui.combo_srcCity, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int srcIndex) {
-		qDebug() << QString::fromStdString(sys->GetCityList().at(srcIndex).m_name);
-
 		/*TODO: 判断用户选择的交通方式*/
 
 		int destIndex = ui.combo_destCity->currentIndex();/*获取起始城市索引*/
-		SetTransList(ui.listWidget_trans, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
+		SetTransList(ui.listWidget_trans, false, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
 		});
+
 	/*处理终点城市更换事件*/
 	connect(ui.combo_destCity, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int destIndex) {
-		qDebug() << QString::fromStdString(sys->GetCityList().at(destIndex).m_name);
-
 		/*TODO: 判断用户选择的交通方式*/
 
 		int srcIndex = ui.combo_srcCity->currentIndex();/*获取起始城市索引*/
-		SetTransList(ui.listWidget_trans, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
+		SetTransList(ui.listWidget_trans,false, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
 		});
 
+	/*处理查询当前正在执行的plan事件*/
 	connect(ui.btn_planMy, &QPushButton::clicked, [=]() {
+		SetTransList(ui.listWidget_plan,true, user->GetPlan());
 		});
 
+	/*处理查询最佳plan事件*/
+	connect(ui.btn_planSearch, &QPushButton::clicked, this, &MainWindow::ShowBestPlan);
 }
 
 MainWindow::~MainWindow() {
@@ -143,7 +146,7 @@ void MainWindow::SetCityList(QComboBox* comboBox, const vector<City>& listCity)
 	}
 }
 
-void MainWindow::SetTransList(QListWidget* listWidget, const vector<Transport>& listTrans)
+void MainWindow::SetTransList(QListWidget* listWidget,bool viewTrueDay, const vector<Transport>& listTrans)
 {
 	//disconnect
 	listWidget->disconnect();
@@ -151,7 +154,7 @@ void MainWindow::SetTransList(QListWidget* listWidget, const vector<Transport>& 
 	listWidget->clear();
 	for (const Transport& trans : listTrans) {
 		QListWidgetItem* item = new QListWidgetItem(listWidget);
-		TransportFrame *f = new TransportFrame(trans,listWidget);
+		TransportFrame* f = new TransportFrame(trans, *sys, viewTrueDay, listWidget);
 		item->setSizeHint(f->size());
 		listWidget->setItemWidget(item, f);
 	}
@@ -184,10 +187,16 @@ void MainWindow::UpdateStatusBar()
 
 		/*设置起始和目的城市*/
 		currSrcCity->setText(
-			QString::fromStdString(user->GetTransport().m_srcCity.m_name)
+			QString::fromStdString(
+				sys->GetCityList()
+				.at(user->GetTransport().m_srcIndex)
+				.m_name).toUpper()
 		);
 		currDestCity->setText(
-			QString::fromStdString(user->GetTransport().m_destCity.m_name)
+			QString::fromStdString(
+				sys->GetCityList()
+				.at(user->GetTransport().m_destIndex)
+				.m_name).toUpper()
 		);
 	} else if (User::status::suspend == user->GetStatus()){
 		/*设置当前transport的进度为0*/
@@ -196,10 +205,16 @@ void MainWindow::UpdateStatusBar()
 
 		/*设置起始和目的城市*/
 		currSrcCity->setText(
-			QString::fromStdString(user->GetTransport().m_srcCity.m_name)
+			QString::fromStdString(
+				sys->GetCityList()
+				.at(user->GetTransport().m_srcIndex)
+				.m_name).toUpper()
 		);
 		currDestCity->setText(
-			QString::fromStdString(user->GetTransport().m_destCity.m_name)
+			QString::fromStdString(
+				sys->GetCityList()
+				.at(user->GetTransport().m_destIndex)
+				.m_name).toUpper()
 		);
 	} else if (User::status::stay == user->GetStatus()) {
 		/*设置当前transport的进度为0且禁用进度条*/
@@ -207,7 +222,11 @@ void MainWindow::UpdateStatusBar()
 		currProgress->setValue(0);
 
 		currDestCity->setText("NONE");
-		currSrcCity->setText(QString::fromStdString(user->GetCity().m_name).toUpper());
+		currSrcCity->setText(QString::fromStdString(
+			sys->GetCityList()
+			.at(user->GetCityIndex())
+			.m_name)
+			.toUpper());
 	}
 	
 	/*设置日期和时间*/
@@ -225,13 +244,48 @@ void MainWindow::UpdatePageTravel()
 	if (User::status::stay == user->GetStatus()) {
 		/*如果用户没有正在旅行,那么下一次旅行的起始地点为用户位置*/
 		qDebug() << QString::fromStdString(user->GetStatusName());
-		ui.combo_srcTravel->addItem(QString::fromStdString(user->GetCity().m_name));
+		ui.combo_srcTravel->addItem(
+			QString::fromStdString(
+				sys->GetCityList()
+				.at(user->GetCityIndex())
+				.m_name));
 	} else {
 		/*如果用户正在旅行,那么更新起始地点为当前旅行计划的终点城市*/
 		qDebug() << user->GetPlan().size();
-		City nextSrc = user->GetPlan().at(user->GetPlan().size() - 1).m_destCity;
+		int srcIndex = user->GetPlan().at(user->GetPlan().size() - 1).m_srcIndex;
+		City nextSrc = sys->GetCityList().at(srcIndex);
 		ui.combo_srcTravel->addItem(QString::fromStdString(nextSrc.m_name));
 	}
 
 	/*将日期同步更新(算了不更了)*/
+}
+
+/*查询并显示最佳plan*/
+void MainWindow::ShowBestPlan()
+{
+	/*计算当前行程结束后的所在城市,即plan的起始城市*/
+	int srcIndex = user->GetCityIndex();			/*默认为当前城市*/
+	if (User::status::stay != user->GetStatus()) {	/*如果当前正在执行计划,则选择计划的终点城市*/
+		srcIndex = user->GetPlan().at(user->GetPlan().size() - 1).m_destIndex;
+	}
+
+	/*获取plan的目的城市*/
+	int destIndex = ui.combo_destTravel->currentIndex();
+
+	/*获取起始时间和日期*/
+	int startTime = sys->GetTime();	/*默认为当前时间*/
+	int startDay = sys->GetDay();	/*默认为当前日期*/
+	if (User::status::stay != user->GetStatus()) {	/*如果当前正在执行计划,则选择计划的终点时间*/
+		startTime = user->GetPlan().at(user->GetPlan().size() - 1).m_endTime;
+		startDay = user->GetPlan().at(user->GetPlan().size() - 1).m_endDay;
+	}
+
+	/*获取最晚到达时间和日期*/
+	int endTime = ui.spinBox_endTime->value();
+	int endDay = ui.spinBox_endDay->value();
+
+	/*计算最佳方案*/
+	planCache = sys->FindPlanLimTime(
+		srcIndex, destIndex, startDay, endDay, startTime, endTime);
+	SetTransList(ui.listWidget_plan, true, planCache);/*将它展现在travel页中*/
 }

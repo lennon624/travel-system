@@ -8,8 +8,8 @@
 
 
 
-User::User(const string& name, const City& city)
-	:m_name(name), m_city(city), m_status(status::stay), m_planIndex(0), m_newPlanFlag(false) {
+User::User(const string& name, int cityIndex)
+	:m_name(name), m_cityIndex(cityIndex), m_status(status::stay), m_planIndex(0), m_newPlanFlag(false) {
 	
 }
 
@@ -49,7 +49,10 @@ void User::UpdateInfo(int time, int day) {
 	switch (m_status)
 	{
 	case status::stay:
-		/*用户状态为stay的时候啥都不干,等待updatePlan将状态转换为suspend*/
+		/*用户状态为stay的时候清空plan,等待updatePlan将状态转换为suspend*/
+		if (!m_plan.empty()) {
+			m_plan.clear();
+		}
 		break;
 	case status::suspend:/*时间超过下一个transport的开始时间后*/
 		if (day > m_plan.at(m_planIndex).m_startDay 
@@ -65,7 +68,7 @@ void User::UpdateInfo(int time, int day) {
 				&& time >= m_plan.at(m_planIndex).m_endTime)) {
 			
 			/*更新所在城市,所在城市为触发的城市*/
-			m_city = m_plan.at(m_planIndex).m_destCity;
+			m_cityIndex = m_plan.at(m_planIndex).m_destIndex;
 			/*结束一段transport*/
 			m_planIndex++;
 			/*判断是否结束一段plan*/
