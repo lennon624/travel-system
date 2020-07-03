@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>Diffnes.qss</file>
         <file>MONACO.TTF</file>
+        <file>img/setting.png</file>
     </qresource>
 </RCC>

@@ -2,14 +2,28 @@
 
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent),
+	settingsWindow(new QWidget(parent)),
 	user(new User("USERNAME", User::DEFAULT_CITY_INDEX)),
 	sys(new TransSystem)
 	/*gTime(0),
 	gDay(0)*/
 {
 	/*初始化ui界面*/
-	ui.setupUi(this);
-	
+	ui.setupUi(this);/*主窗口*/
+	ui_settings.setupUi(settingsWindow);/*设置窗口*/
+	settingsWindow->setWindowFlag(Qt::WindowType::FramelessWindowHint);
+	settingsWindow->setStyleSheet(
+		"QWidget{background-color: #35353b;}\
+		 QPushButton{background-color: #4891b4;}\
+		 QPushButton::hover{background-color: #54aad3;border: 1px solid #46a2da;}\
+		 QPushButton::pressed{background-color: #2385b4;border: 1px solid #46a2da;}");
+
+	/*调整一下setting按钮的尺寸*/
+	ui.btn_planSetting->setFixedSize(QSize(
+		ui.btn_planSearch->height()+9,
+		ui.btn_planSearch->height()+9));
+
+
 	/*添加状态栏标签*/
 	currProgress = new QProgressBar(this);
 	currSrcCity = new QLabel(this);
@@ -25,23 +39,23 @@ MainWindow::MainWindow(QWidget* parent)
 	ui.statusBar->addWidget(currTime);
 	ui.statusBar->addWidget(currDay);
 	ui.statusBar->addWidget(currUserStatus);
+	
+	///*debug 设置user状态*/
+	//user->UpdatePlan({
+	//	
+	//	Transport(
+	//	0,
+	//	2,
+	//	Vehicle::bus,5,10,0,2),
 
-	/*debug 设置user状态*/
-	user->UpdatePlan({
-		
-		Transport(
-		0,
-		2,
-		Vehicle::bus,5,10,0,2),
-
-		Transport(
-		2,
-		1,
-		Vehicle::bus,0,15,3,5) 
-		}
-	); /*从城市0到城市2,  0:00到10:00*/
-	/*debug 把系统时间调整到3*/
-	user->UpdateInfo(sys->GetTime(),sys->GetDay());
+	//	Transport(
+	//	2,
+	//	1,
+	//	Vehicle::bus,0,15,3,5) 
+	//	}
+	//); /*从城市0到城市2,  0:00到10:00*/
+	///*debug 把系统时间调整到3*/
+	//user->UpdateInfo(sys->GetTime(),sys->GetDay());
 
 
 	/*初始化所有页面*/
@@ -103,10 +117,31 @@ MainWindow::MainWindow(QWidget* parent)
 	/*处理查询当前正在执行的plan事件*/
 	connect(ui.btn_planMy, &QPushButton::clicked, [=]() {
 		SetTransList(ui.listWidget_plan,true, user->GetPlan());
+		/*切换到myPlan之后当作抛弃搜索结果,也不能confirm*/
+		ui.btn_planConfirm->setEnabled(false);
 		});
 
 	/*处理查询最佳plan事件*/
 	connect(ui.btn_planSearch, &QPushButton::clicked, this, &MainWindow::ShowBestPlan);
+	
+	/*处理更新最佳plan事件*/
+	connect(ui.btn_planConfirm, &QPushButton::clicked, [=]() {
+		user->SetNewPlanFlag(true);
+		ui.btn_planConfirm->setEnabled(false);
+		});
+
+	/*处理弹出和关闭设置页面事件*/
+	connect(ui.btn_planSetting, &QPushButton::clicked, [=]() {
+		if (settingsWindow->isVisible()) {
+			settingsWindow->setVisible(false);
+		} else {
+			settingsWindow->setVisible(true);
+		}
+		});
+	
+	connect(ui_settings.btn_close, &QPushButton::clicked, [=]() {
+		settingsWindow->setVisible(false);
+		});
 }
 
 MainWindow::~MainWindow() {
@@ -134,7 +169,13 @@ void MainWindow::timerEvent(QTimerEvent* ev)
 
 		/*更新travel页*/
 		UpdatePageTravel();
+
 	}
+}
+
+void MainWindow::closeEvent(QCloseEvent* ev)
+{
+	settingsWindow->close();/*顺便把附属窗口关掉*/
 }
 
 
@@ -252,10 +293,13 @@ void MainWindow::UpdatePageTravel()
 	} else {
 		/*如果用户正在旅行,那么更新起始地点为当前旅行计划的终点城市*/
 		qDebug() << user->GetPlan().size();
-		int srcIndex = user->GetPlan().at(user->GetPlan().size() - 1).m_srcIndex;
+		int srcIndex = user->GetPlan().at(user->GetPlan().size() - 1).m_destIndex;
 		City nextSrc = sys->GetCityList().at(srcIndex);
 		ui.combo_srcTravel->addItem(QString::fromStdString(nextSrc.m_name));
 	}
+
+	/*由于之前搜的计划过期了，不应该再confirm，所以禁用confirm按钮*/
+	ui.btn_planConfirm->setEnabled(false);
 
 	/*将日期同步更新(算了不更了)*/
 }
@@ -288,4 +332,11 @@ void MainWindow::ShowBestPlan()
 	planCache = sys->FindPlanLimTime(
 		srcIndex, destIndex, startDay, endDay, startTime, endTime);
 	SetTransList(ui.listWidget_plan, true, planCache);/*将它展现在travel页中*/
+
+	/*调整confirm按钮的状态*/
+	if (planCache.empty()) {/*如果获取到的计划是空的,即搜索结果为无解*/
+		ui.btn_planConfirm->setEnabled(false);	/*则不允许用户确认行程*/
+	} else{
+		ui.btn_planConfirm->setEnabled(true);	/*允许用户确认行程*/
+	}
 }

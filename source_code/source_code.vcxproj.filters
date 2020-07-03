@@ -72,10 +72,18 @@
     <QtUic Include="TransportFrame.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="SettingsWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <Font Include="MONACO.TTF">
       <Filter>Resource Files</Filter>
     </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="img\setting.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

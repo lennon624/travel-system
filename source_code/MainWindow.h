@@ -8,6 +8,7 @@
 #include "Transport.h"
 #include "TransportFrame.h"
 #include "ui_MainWindow.h"
+#include "ui_SettingsWindow.h"
 #include "User.h"
 #include "QListWidget"
 
@@ -22,8 +23,13 @@ public:
 
 protected:
 	void timerEvent(QTimerEvent* ev)override;
+    void closeEvent(QCloseEvent* ev)override;
 private:
+    /*主窗口ui*/
     Ui::MainWindowClass ui;
+    /*设置窗口ui*/
+    Ui::SettingsWindow ui_settings;
+    QWidget* settingsWindow;
 
     /*状态栏的标签*/
     QLabel* currSrcCity;
@@ -37,7 +43,7 @@ private:
     TransSystem* sys;
 
     int hTimerId; /*时钟timer的id*/
-    const int MS_PER_H = 200;/*每小时多少毫秒*/
+    const int MS_PER_H = 5000;/*每小时多少毫秒*/
     vector<Transport> planCache;
     //int gTime;  /*时间*/
     //int gDay;   /*日期*/
@@ -47,4 +53,6 @@ private:
     void UpdateStatusBar();
     void UpdatePageTravel();
     void ShowBestPlan();
+
+
 };
