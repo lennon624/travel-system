@@ -142,6 +142,11 @@ MainWindow::MainWindow(QWidget* parent)
 	connect(ui_settings.btn_close, &QPushButton::clicked, [=]() {
 		settingsWindow->setVisible(false);
 		});
+
+	/*处理settings的修改事件*/
+	connect(ui_settings.check_limTime, &QCheckBox::stateChanged, this, &MainWindow::OnSettingChanged);
+	connect(ui_settings.check_repVisit, &QCheckBox::stateChanged, this, &MainWindow::OnSettingChanged);
+	connect(ui_settings.check_transRisk, &QCheckBox::stateChanged, this, &MainWindow::OnSettingChanged);
 }
 
 MainWindow::~MainWindow() {
@@ -328,10 +333,18 @@ void MainWindow::ShowBestPlan()
 	int endTime = ui.spinBox_endTime->value();
 	int endDay = ui.spinBox_endDay->value();
 
-	/*计算最佳方案*/
-	planCache = sys->FindPlanLimTime(
-		srcIndex, destIndex, startDay, endDay, startTime, endTime);
-	SetTransList(ui.listWidget_plan, true, planCache);/*将它展现在travel页中*/
+	/*-----------------------计算最佳方案-----------------------------*/
+	//qDebug() << ui_settings.check_limTime->isChecked();
+
+	if (!ui_settings.check_transRisk->isChecked())		/*不考虑路上风险*/
+	{
+		planCache = sys->FindPlanLimTime(
+			srcIndex, destIndex, startDay, endDay, startTime, endTime,
+			ui_settings.check_repVisit->isChecked(),		/*是否考虑限时*/
+			ui_settings.check_limTime->isChecked());		/*获取用户是否允许重复访问*/
+		SetTransList(ui.listWidget_plan, true, planCache);	/*将它展现在travel页中*/
+	}
+	
 
 	/*调整confirm按钮的状态*/
 	if (planCache.empty()) {/*如果获取到的计划是空的,即搜索结果为无解*/
@@ -339,4 +352,20 @@ void MainWindow::ShowBestPlan()
 	} else{
 		ui.btn_planConfirm->setEnabled(true);	/*允许用户确认行程*/
 	}
+}
+
+void MainWindow::OnSettingChanged(int state)
+{
+	/*不限时也不考虑交通方式的风险的情况下，不可以选择允许重复访问*/
+
+	/*如果第一第二个checkbox中任意一个被取消的时候,查看另一个,如果也被取消了,那就设置第三个选项为disable和false*/
+	/*其他情况下,设置第三个框框为enable*/
+	if(!ui_settings.check_limTime->isChecked()			
+		&& !ui_settings.check_transRisk->isChecked()) {/*两个都没有打勾*/
+		ui_settings.check_repVisit->setEnabled(false);	/*禁用第三个*/
+		ui_settings.check_repVisit->setChecked(false);	/*取消第三个勾*/
+	} else {
+		ui_settings.check_repVisit->setEnabled(true);	/*其他情况下允许选择允许重复*/
+	}
+	
 }

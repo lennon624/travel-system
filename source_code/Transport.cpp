@@ -54,7 +54,8 @@ TransSystem::TransSystem()
 	m_timeTable(CITY_COUNT, vector<vector<Vehicle::Type>>(CITY_COUNT, vector<Vehicle::Type>(MAX_TIME))),/*三维的时间表*/
 	a_plan({}),
 	a_bestRisk(-1),
-	a_bestPlan({})
+	a_bestPlan({}),
+	a_routeIndices({})
 {
 
 	/*确定交通方式图*/
@@ -147,7 +148,7 @@ void TransSystem::a_DFS_limTime(
 	int srcIndex, int destIndex, 
 	int startDay, int endDay, 
 	int startTime, int endTime,
-	int riskBefore)
+	int riskBefore, bool repeat, bool limTime)
 {
 	/*
 		每一轮搜索的时候，都将一个transport塞到plan后面,然后从该transport的到达时间和到达日期开始递归
@@ -163,11 +164,24 @@ void TransSystem::a_DFS_limTime(
 
 		/*剪枝: 风险值过大*/
 		int riskAfter = riskBefore + time * m_cityList[srcIndex].m_risk;/*计算选择此刻出发的累积风险*/
-		if (a_bestRisk >= 0 && riskAfter >= a_bestRisk)return;								/*如果此刻出发风险已经超了,那就不用再算下去了*/
+		if (a_bestRisk >= 0 && riskAfter >= a_bestRisk)return;			/*如果此刻出发风险已经超了,那就不用再算下去了*/
 
 		for (int cityi = 0; cityi < CITY_COUNT; cityi++) {	/*遍历每个城市，寻找此刻的邻居节点*/
+			
+			/*剪枝, 用户要求不允许重复访问一个城市*/
+			if ([=]()->bool {
+				if (!repeat) { /*如果不允许重复访问一个城市*/
+					for (int i : a_routeIndices) {/*查找是否经过了相同的城市*/
+						if (i == cityi) return true;/*找到相同城市,返回重复*/
+					}
+				}
+				return false;/*否则返回不重复*/
+				}()) { 
+				continue;/*如果重复，则跳过这个城市*/
+			}
+			
 
-			if (cityi != srcIndex) {						/*排除下一个节点是当前城市的情况*/
+			if (cityi != srcIndex) {	/*排除下一个节点是当前城市的情况*/
 
 				/*调用函数,优先级顺序plane > train > bus*/
 				/*如果此刻有从src到cityi的飞机,则该飞机加入计划中并递归*/
@@ -176,7 +190,7 @@ void TransSystem::a_DFS_limTime(
 						srcIndex, destIndex,
 						startDay, endDay,
 						startTime, endTime,
-						riskBefore, time, cityi, riskAfter, Vehicle::plane)) {
+						riskBefore, repeat, limTime, time, cityi, riskAfter, Vehicle::plane)) {
 						return;
 					}
 				}
@@ -186,7 +200,7 @@ void TransSystem::a_DFS_limTime(
 						srcIndex, destIndex,
 						startDay, endDay,
 						startTime, endTime,
-						riskBefore, time, cityi, riskAfter, Vehicle::train)) {
+						riskBefore, repeat,limTime, time, cityi, riskAfter, Vehicle::train)) {
 						return;
 					}
 				}
@@ -196,7 +210,7 @@ void TransSystem::a_DFS_limTime(
 						srcIndex, destIndex,
 						startDay, endDay,
 						startTime, endTime,
-						riskBefore, time, cityi, riskAfter, Vehicle::bus)) {
+						riskBefore, repeat, limTime, time, cityi, riskAfter, Vehicle::bus)) {
 						return;
 					}
 				}
@@ -212,9 +226,9 @@ void TransSystem::a_DFS_limTime(
 */
 bool TransSystem::a_DFS_limTimeEachVehicle(
 	int srcIndex, int destIndex,
-	int startDay, int endDay, 
+	int startDay, int endDay,
 	int startTime, int endTime,
-	int riskBefore, 
+	int riskBefore, bool repeat, bool limTime,
 	int time,int cityi,int riskAfter, Vehicle::Type v)/*最后四个参数是主函数中的局部变量*/
 {
 	//TODO:	if have transport in this time
@@ -225,17 +239,19 @@ bool TransSystem::a_DFS_limTimeEachVehicle(
 	transStartTime = transStartTime % MAX_TIME;	/*时间取模*/
 	Transport t = GenTransport(transStartTime, v, srcIndex, cityi, transStartDay);/*这里交通方式是个变量,要改*/
 	a_plan.push_back(t);						/*将生成的transport加入plan中*/
+	a_routeIndices.push_back(t.m_destIndex);	/*将下个城市加入route中*/
 
 	/*******************剪枝*********************************************/
 
-	/*剪枝,当前方案时间超出(>)了ddl,不再考虑这个transport*/
-	if (!CompareDateTimeL(t.m_endTime, endTime, t.m_endDay, endDay)) {
+	/*剪枝,如果用户要求limitTime,并且当前方案时间超出(>)了ddl,不再考虑这个transport*/
+	if (!limTime || !CompareDateTimeL(t.m_endTime, endTime, t.m_endDay, endDay)) {
 
 		/*剪枝,处理"如果选择该transport后即可到达目的地"的情况*/
 		if (cityi == destIndex) {		/*到达目的城市*/
 			a_bestPlan = a_plan;		/*更新最佳行程plan*/
 			a_bestRisk = riskAfter;		/*更新最佳风险值*/
 			a_plan.pop_back();			/*弹出该方案*/
+			a_routeIndices.pop_back();
 			return true;				/*不再往下遍历(不再考虑延后时间),直接返回,*/
 										/*因为不考虑时间长短的时候,继续走下去风险也是一样的*/
 										/*考虑路上的风险时,则需要更复杂的方法,不能直接return,因为可能1小时后的飞机风险更低*/
@@ -246,13 +262,14 @@ bool TransSystem::a_DFS_limTimeEachVehicle(
 			cityi, destIndex,
 			t.m_endDay, endDay,
 			t.m_endTime, endTime,
-			riskAfter);
+			riskAfter, repeat, limTime);
 	}
 
 
 	/*******************************************************/
 
 	a_plan.pop_back();/*弹出*/
+	a_routeIndices.pop_back();
 	return false;
 
 }
@@ -300,11 +317,12 @@ const vector<Transport> TransSystem::GetTransList(int srcIndex, int destIndex, V
 const vector<Transport> TransSystem::FindPlanLimTime(
 	int srcIndex, int destIndex, 
 	int startDay, int endDay, 
-	int startTime, int endTime)
+	int startTime, int endTime,
+	bool repeat, bool limTime)
 {
-	a_InitAlgorithm();/*初始化全局变量*/
+	a_InitAlgorithm(srcIndex);/*初始化全局变量*/
 	if (CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
-		a_DFS_limTime(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0);/*初始风险值设为0*/
+		a_DFS_limTime(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0, repeat, limTime);/*初始风险值设为0*/
 	}
 	return a_bestPlan;
 }

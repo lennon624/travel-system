@@ -142,15 +142,21 @@ public:
 	static const bool CompareDateTimeL(int timeA, int timeB, int dayA, int dayB);
 
 	/**************算法模块****************************************/
+	/*有限时间 - 不考虑交通工具风险 - 默认允许重复城市*/
 	const vector<Transport>FindPlanLimTime(
 		int srcIndex, int destIndex,
 		int startDay, int endDay,
-		int startTime, int endTime);
+		int startTime, int endTime,
+		bool repeat, bool limTime /*是否允许重复城市和是否限时*/
+	);
+
+
 	/**************算法模块****************************************/
 
 
 
 private:
+
 	vector<vector<vector<Vehicle::Type>>> m_timeTable;	/*三维数组,表示两个地点之间24小时的所有航班*/
 	vector<vector<Vehicle::Type>> m_transMap;	/*交通方式表,表示两点之间是否有航班*/
 	vector<vector<int>> m_distMap;				/*距离表,表示乘坐飞机的时间,乘坐火车,汽车时间分别为飞机*/
@@ -176,20 +182,26 @@ private:
 	vector<Transport> a_bestPlan;	/*最优解*/
 	//int a_risk;					/*全局变量,当前plan累计的风险*/
 	int a_bestRisk;					/*全局变量,当前最优的plan累计的风险,-1表示还没有最优解*/
+	vector<int> a_routeIndices;		/*全局变量,表示已经经过的城市,路线*/
 	
-	void a_InitAlgorithm() { a_plan = {}, a_bestPlan = {}, a_bestRisk = -1; }/*初始化算法的全局变量*/
+	void a_InitAlgorithm(int srcIndex) {
+		a_plan = {}; 
+		a_bestPlan = {}; 
+		a_bestRisk = -1;
+		a_routeIndices = { srcIndex };/*起始城市加入路径中*/
+	}/*初始化算法的全局变量*/
 
 	void a_DFS_limTime(
 		int srcIndex, int destIndex,
 		int startDay, int endDay,
 		int startTime, int endTime,
-		int riskBefore);		/*递归搜有限时间内最低风险*/
+		int riskBefore, bool repeat, bool limTime);		/*递归搜有限时间内最低风险*/
 
 	bool a_DFS_limTimeEachVehicle( /*a_DFS_limTime的一个组件，用来区分所有交通方式*/
 		int srcIndex, int destIndex,
 		int startDay, int endDay,
 		int startTime, int endTime,
-		int riskBefore,
+		int riskBefore, bool repeat, bool limTime,
 		int time, int cityi, int riskAfter, Vehicle::Type v);
 
 
