@@ -143,7 +143,7 @@ public:
 
 	/**************算法模块****************************************/
 	/*有限时间 - 不考虑交通工具风险 - 默认允许重复城市*/
-	const vector<Transport>FindPlanLimTime(
+	const vector<Transport>FindPlanNoRisk(
 		int srcIndex, int destIndex,
 		int startDay, int endDay,
 		int startTime, int endTime,
@@ -191,13 +191,13 @@ private:
 		a_routeIndices = { srcIndex };/*起始城市加入路径中*/
 	}/*初始化算法的全局变量*/
 
-	void a_DFS_limTime(
+	void a_DFS_noRisk(
 		int srcIndex, int destIndex,
 		int startDay, int endDay,
 		int startTime, int endTime,
 		int riskBefore, bool repeat, bool limTime);		/*递归搜有限时间内最低风险*/
 
-	bool a_DFS_limTimeEachVehicle( /*a_DFS_limTime的一个组件，用来区分所有交通方式*/
+	bool a_DFS_noRiskEachVehicle( /*a_DFS_limTime的一个组件，用来区分所有交通方式*/
 		int srcIndex, int destIndex,
 		int startDay, int endDay,
 		int startTime, int endTime,

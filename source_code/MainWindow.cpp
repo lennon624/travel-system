@@ -338,7 +338,7 @@ void MainWindow::ShowBestPlan()
 
 	if (!ui_settings.check_transRisk->isChecked())		/*不考虑路上风险*/
 	{
-		planCache = sys->FindPlanLimTime(
+		planCache = sys->FindPlanNoRisk(
 			srcIndex, destIndex, startDay, endDay, startTime, endTime,
 			ui_settings.check_repVisit->isChecked(),		/*是否考虑限时*/
 			ui_settings.check_limTime->isChecked());		/*获取用户是否允许重复访问*/

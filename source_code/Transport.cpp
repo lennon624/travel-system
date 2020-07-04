@@ -144,7 +144,7 @@ const Transport TransSystem::GenTransport(
 /*
 	Discription::		DFS递归函数寻找有限时间内最低风险
 */
-void TransSystem::a_DFS_limTime(
+void TransSystem::a_DFS_noRisk(
 	int srcIndex, int destIndex, 
 	int startDay, int endDay, 
 	int startTime, int endTime,
@@ -186,7 +186,7 @@ void TransSystem::a_DFS_limTime(
 				/*调用函数,优先级顺序plane > train > bus*/
 				/*如果此刻有从src到cityi的飞机,则该飞机加入计划中并递归*/
 				if (m_timeTable[srcIndex][cityi].at((startTime + time)%MAX_TIME)& Vehicle::plane) {
-					if (a_DFS_limTimeEachVehicle(
+					if (a_DFS_noRiskEachVehicle(
 						srcIndex, destIndex,
 						startDay, endDay,
 						startTime, endTime,
@@ -196,7 +196,7 @@ void TransSystem::a_DFS_limTime(
 				}
 				/*如果此刻有从src到cityi的火车,则该火车加入计划中并递归*/
 				if (m_timeTable[srcIndex][cityi].at((startTime + time)%MAX_TIME)& Vehicle::train) {
-					if (a_DFS_limTimeEachVehicle(
+					if (a_DFS_noRiskEachVehicle(
 						srcIndex, destIndex,
 						startDay, endDay,
 						startTime, endTime,
@@ -206,7 +206,7 @@ void TransSystem::a_DFS_limTime(
 				}
 				/*如果此刻有从src到cityi的汽车,则该汽车加入计划中并递归*/
 				if (m_timeTable[srcIndex][cityi].at((startTime + time)%MAX_TIME)& Vehicle::bus) {
-					if (a_DFS_limTimeEachVehicle(
+					if (a_DFS_noRiskEachVehicle(
 						srcIndex, destIndex,
 						startDay, endDay,
 						startTime, endTime,
@@ -224,7 +224,7 @@ void TransSystem::a_DFS_limTime(
 	return:	
 		bool		为true的时候说明主函数需要执行return操作
 */
-bool TransSystem::a_DFS_limTimeEachVehicle(
+bool TransSystem::a_DFS_noRiskEachVehicle(
 	int srcIndex, int destIndex,
 	int startDay, int endDay,
 	int startTime, int endTime,
@@ -258,7 +258,7 @@ bool TransSystem::a_DFS_limTimeEachVehicle(
 		}
 
 		/*正常情况下,加入这个transport没有超时,则从该transport结束的地点和城市开始继续查找遍历*/
-		a_DFS_limTime(
+		a_DFS_noRisk(
 			cityi, destIndex,
 			t.m_endDay, endDay,
 			t.m_endTime, endTime,
@@ -314,7 +314,7 @@ const vector<Transport> TransSystem::GetTransList(int srcIndex, int destIndex, V
 	return:			
 		const vector<Transport>TransSystem	最佳plan数组
 */
-const vector<Transport> TransSystem::FindPlanLimTime(
+const vector<Transport> TransSystem::FindPlanNoRisk(
 	int srcIndex, int destIndex, 
 	int startDay, int endDay, 
 	int startTime, int endTime,
@@ -322,7 +322,7 @@ const vector<Transport> TransSystem::FindPlanLimTime(
 {
 	a_InitAlgorithm(srcIndex);/*初始化全局变量*/
 	if (CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
-		a_DFS_limTime(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0, repeat, limTime);/*初始风险值设为0*/
+		a_DFS_noRisk(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0, repeat, limTime);/*初始风险值设为0*/
 	}
 	return a_bestPlan;
 }
