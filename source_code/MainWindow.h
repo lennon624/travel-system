@@ -43,7 +43,7 @@ private:
     TransSystem* sys;
 
     int hTimerId; /*时钟timer的id*/
-    const int MS_PER_H = 1000;/*每小时多少毫秒*/
+    const int MS_PER_H = 2000;/*每小时多少毫秒*/
     vector<Transport> planCache;
     //int gTime;  /*时间*/
     //int gDay;   /*日期*/

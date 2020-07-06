@@ -47,7 +47,14 @@ public:
 	struct Attribute {
 		string  name;
 		int m_interval;	//两次航班的固定间隔
-		int m_distTimes;//速度,需要的时间是distMap[a][b]的多少倍
+		int m_distTimes;
+		
+		
+		
+		
+		
+		//速度,需要的时间是distMap[a][b]的多少倍
+		int m_risk;		//每小时风险值
 	};
 	
 	//获取属性,返回Attribute
@@ -87,7 +94,7 @@ struct Transport
 		m_startTime(startTime), m_endTime(endTime), m_startDay(startDay), m_endDay(endDay) {}
 	
 	//默认构造
-	Transport() :m_means(Vehicle::bus), m_startTime(0), m_endTime(0), m_startDay(0), m_endDay(0) {}
+	//Transport() :m_means(Vehicle::bus), m_startTime(0), m_endTime(0), m_startDay(0), m_endDay(0) {}
 
 	//int m_id;				/*这个车次的ID,从0开始*/
 
@@ -135,7 +142,7 @@ public:
 
 	static const int CountTime(int startTime, int endTime);
 	static const int CountTime(int startTime, int endTime, int startDay, int endDay);
-
+	
 	/*比较时间日期大小,返回A>=B*/
 	static const bool CompareDateTimeLE(int timeA, int timeB, int dayA, int dayB);
 	/*比较时间日期大小,返回A>B*/
@@ -143,11 +150,11 @@ public:
 
 	/**************算法模块****************************************/
 	/*有限时间 - 不考虑交通工具风险 - 默认允许重复城市*/
-	const vector<Transport>FindPlanNoRisk(
+	const vector<Transport>FindPlan(
 		int srcIndex, int destIndex,
 		int startDay, int endDay,
 		int startTime, int endTime,
-		bool repeat, bool limTime /*是否允许重复城市和是否限时*/
+		bool repeat, bool limTime, bool enableTransRisk /*是否允许重复城市和是否限时*/
 	);
 
 
@@ -180,28 +187,33 @@ private:
 	/*算法模块***a_开头*********************************************/
 	vector<Transport> a_plan;		/*全局变量,当前遍历的plan数组*/
 	vector<Transport> a_bestPlan;	/*最优解*/
+	vector<bool> a_visitedFlags;		/*表示城市有没有遍历过*/
 	//int a_risk;					/*全局变量,当前plan累计的风险*/
 	int a_bestRisk;					/*全局变量,当前最优的plan累计的风险,-1表示还没有最优解*/
-	vector<int> a_routeIndices;		/*全局变量,表示已经经过的城市,路线*/
+	//vector<int> a_routeIndices;		/*全局变量,表示已经经过的城市,路线*/
 	
 	void a_InitAlgorithm(int srcIndex) {
 		a_plan = {}; 
 		a_bestPlan = {}; 
 		a_bestRisk = -1;
-		a_routeIndices = { srcIndex };/*起始城市加入路径中*/
+		//a_routeIndices = { srcIndex };/*起始城市加入路径中*/
+		a_visitedFlags = vector<bool>(CITY_COUNT, false);
+		a_visitedFlags.at(srcIndex) = true;/*起始城市设置为已遍历*/
 	}/*初始化算法的全局变量*/
 
-	void a_DFS_noRisk(
+	void a_DFS(
 		int srcIndex, int destIndex,
 		int startDay, int endDay,
 		int startTime, int endTime,
-		int riskBefore, bool repeat, bool limTime);		/*递归搜有限时间内最低风险*/
+		int riskBefore, 
+		bool enableRepeat, bool enableLimTime, bool enableTransRisk);		/*递归搜有限时间内最低风险*/
 
-	bool a_DFS_noRiskEachVehicle( /*a_DFS_limTime的一个组件，用来区分所有交通方式*/
+	bool a_DFS_EachVehicle( /*a_DFS_limTime的一个组件，用来区分所有交通方式*/
 		int srcIndex, int destIndex,
 		int startDay, int endDay,
 		int startTime, int endTime,
-		int riskBefore, bool repeat, bool limTime,
+		int riskBefore, 
+		bool enableRepeat, bool enableLimTime,bool enableTransRisk,
 		int time, int cityi, int riskAfter, Vehicle::Type v);
 
 

@@ -23,16 +23,17 @@ Vehicle::~Vehicle()
 }
 
 const Vehicle::Attribute Vehicle::GetAttribute(Vehicle::Type type) {
+	/*返回值名字，发车间隔，单位里程所需时间，单位时间风险值*/
 	switch (type)
 	{
 	case Vehicle::bus:
-		return { "BUS",2,4 };
+		return { "BUS",2,4,2}; 
 		break;
 	case Vehicle::train:
-		return { "TRAIN",4,2 };
+		return { "TRAIN",4,2,5 };
 		break;
 	case Vehicle::plane:
-		return { "PLANE",6,1 };
+		return { "PLANE",6,1,9 };
 		break;
 	default:
 		break;
@@ -45,7 +46,7 @@ const Vehicle::Attribute Vehicle::GetAttribute(Vehicle::Type type) {
 TransSystem::TransSystem()
 	:m_time(0),/*时间为0*/
 	m_day(0),
-	m_cityList(										/*城市列表*/
+	m_cityList(													/*城市列表,名字+风险值*/
 		{ {"Beijing",0.9},{"Guangzhou",0.7},{"Wuhan",0.9},
 		{"ShenZhen",0.5}/*,{"Tianjin",0.5},{"Shanghai",0.5},
 		{"Xinjiang",0.2},{"Xiamen",0.2},{"Sichuan",0.2},{ "Guilin",0.2 }*/ }),
@@ -55,7 +56,8 @@ TransSystem::TransSystem()
 	a_plan({}),
 	a_bestRisk(-1),
 	a_bestPlan({}),
-	a_routeIndices({})
+	//a_routeIndices({}),
+	a_visitedFlags(vector<bool>(CITY_COUNT, false))
 {
 
 	/*确定交通方式图*/
@@ -143,17 +145,25 @@ const Transport TransSystem::GenTransport(
 
 /*
 	Discription::		DFS递归函数寻找有限时间内最低风险
+	params:
+		起始城市,终点城市
+		起始日期,最晚到达日期(不限时的时候这个日期无效)
+		累计风险
+		三个标志位:是否允许重复访问,是否限时,是否计算路上风险
 */
-void TransSystem::a_DFS_noRisk(
+void TransSystem::a_DFS(
 	int srcIndex, int destIndex, 
 	int startDay, int endDay, 
 	int startTime, int endTime,
-	int riskBefore, bool repeat, bool limTime)
+	int riskBefore, 
+	bool enableRepeat, bool enableLimTime,bool enableTransRisk)
 {
 	/*
 		每一轮搜索的时候，都将一个transport塞到plan后面,然后从该transport的到达时间和到达日期开始递归
 		递归调用结束,将该transport从plan中pop出来。
-		* 不能解决从a到a的问题,会找很长时间没有解,请在客户端层面或者算法调用函数层面解决 TODO
+		* 不能解决从a到a的问题,会找很长时间没有解,请在客户端层面或者算法调用函数层面解决 
+		* 在不考虑路上风险的时候，当找到一个邻居是终点的时候，不再遍历其他邻居(子函数返回true)。因为此时的停留时间最短，风险最小。
+		* 考虑路上风险的时候,子函数永远返回false就行了，子函数需要更新riskAfter+=改行程的risk。
 	*/
 	if (destIndex == srcIndex)return;/*非法情况,找不到解*/
 
@@ -169,48 +179,46 @@ void TransSystem::a_DFS_noRisk(
 		for (int cityi = 0; cityi < CITY_COUNT; cityi++) {	/*遍历每个城市，寻找此刻的邻居节点*/
 			
 			/*剪枝, 用户要求不允许重复访问一个城市*/
-			if ([=]()->bool {
-				if (!repeat) { /*如果不允许重复访问一个城市*/
-					for (int i : a_routeIndices) {/*查找是否经过了相同的城市*/
-						if (i == cityi) return true;/*找到相同城市,返回重复*/
-					}
-				}
-				return false;/*否则返回不重复*/
-				}()) { 
-				continue;/*如果重复，则跳过这个城市*/
+			if (!enableRepeat && a_visitedFlags.at(cityi)) {
+				continue;
 			}
 			
-
 			if (cityi != srcIndex) {	/*排除下一个节点是当前城市的情况*/
 
 				/*调用函数,优先级顺序plane > train > bus*/
 				/*如果此刻有从src到cityi的飞机,则该飞机加入计划中并递归*/
 				if (m_timeTable[srcIndex][cityi].at((startTime + time)%MAX_TIME)& Vehicle::plane) {
-					if (a_DFS_noRiskEachVehicle(
+					if (a_DFS_EachVehicle(
 						srcIndex, destIndex,
 						startDay, endDay,
 						startTime, endTime,
-						riskBefore, repeat, limTime, time, cityi, riskAfter, Vehicle::plane)) {
+						riskBefore, 
+						enableRepeat, enableLimTime,enableTransRisk,
+						time, cityi, riskAfter, Vehicle::plane)) {
 						return;
 					}
 				}
 				/*如果此刻有从src到cityi的火车,则该火车加入计划中并递归*/
 				if (m_timeTable[srcIndex][cityi].at((startTime + time)%MAX_TIME)& Vehicle::train) {
-					if (a_DFS_noRiskEachVehicle(
+					if (a_DFS_EachVehicle(
 						srcIndex, destIndex,
 						startDay, endDay,
 						startTime, endTime,
-						riskBefore, repeat,limTime, time, cityi, riskAfter, Vehicle::train)) {
+						riskBefore, 
+						enableRepeat, enableLimTime,enableTransRisk,
+						time, cityi, riskAfter, Vehicle::train)) {
 						return;
 					}
 				}
 				/*如果此刻有从src到cityi的汽车,则该汽车加入计划中并递归*/
 				if (m_timeTable[srcIndex][cityi].at((startTime + time)%MAX_TIME)& Vehicle::bus) {
-					if (a_DFS_noRiskEachVehicle(
+					if (a_DFS_EachVehicle(
 						srcIndex, destIndex,
 						startDay, endDay,
 						startTime, endTime,
-						riskBefore, repeat, limTime, time, cityi, riskAfter, Vehicle::bus)) {
+						riskBefore, 
+						enableRepeat, enableLimTime,enableTransRisk,
+						time, cityi, riskAfter, Vehicle::bus)) {
 						return;
 					}
 				}
@@ -224,11 +232,12 @@ void TransSystem::a_DFS_noRisk(
 	return:	
 		bool		为true的时候说明主函数需要执行return操作
 */
-bool TransSystem::a_DFS_noRiskEachVehicle(
+bool TransSystem::a_DFS_EachVehicle(
 	int srcIndex, int destIndex,
 	int startDay, int endDay,
 	int startTime, int endTime,
-	int riskBefore, bool repeat, bool limTime,
+	int riskBefore,	/*这个参数没用*/
+	bool enableRepeat, bool enableLimTime, bool enableTransRisk,
 	int time,int cityi,int riskAfter, Vehicle::Type v)/*最后四个参数是主函数中的局部变量*/
 {
 	//TODO:	if have transport in this time
@@ -239,37 +248,49 @@ bool TransSystem::a_DFS_noRiskEachVehicle(
 	transStartTime = transStartTime % MAX_TIME;	/*时间取模*/
 	Transport t = GenTransport(transStartTime, v, srcIndex, cityi, transStartDay);/*这里交通方式是个变量,要改*/
 	a_plan.push_back(t);						/*将生成的transport加入plan中*/
-	a_routeIndices.push_back(t.m_destIndex);	/*将下个城市加入route中*/
+	//a_routeIndices.push_back(t.m_destIndex);	/*将下个城市加入route中*/
+	a_visitedFlags.at(t.m_destIndex) = true;	/*设置已遍历*/
+
 
 	/*******************剪枝*********************************************/
 
-	/*剪枝,如果用户要求limitTime,并且当前方案时间超出(>)了ddl,不再考虑这个transport*/
-	if (!limTime || !CompareDateTimeL(t.m_endTime, endTime, t.m_endDay, endDay)) {
+	/*剪枝,如果用户要求**限时**,并且当前方案时间超出(>)了ddl,不再考虑这个transport*/
+	/*剪枝,如果用户要求**考虑路上风险**,那么更新riskAfter并重新判断一次风险是否超出最佳风险*/
+	if (enableTransRisk) {
+		riskAfter += CountTime(t.m_startTime, t.m_endTime, t.m_startDay, t.m_endDay)
+			* Vehicle::GetAttribute(v).m_risk;/*路上风险=路上时间*交通工具风险值**/
+	}
 
-		/*剪枝,处理"如果选择该transport后即可到达目的地"的情况*/
-		if (cityi == destIndex) {		/*到达目的城市*/
-			a_bestPlan = a_plan;		/*更新最佳行程plan*/
-			a_bestRisk = riskAfter;		/*更新最佳风险值*/
-			a_plan.pop_back();			/*弹出该方案*/
-			a_routeIndices.pop_back();
-			return true;				/*不再往下遍历(不再考虑延后时间),直接返回,*/
-										/*因为不考虑时间长短的时候,继续走下去风险也是一样的*/
-										/*考虑路上的风险时,则需要更复杂的方法,不能直接return,因为可能1小时后的飞机风险更低*/
+	if (
+		(!enableLimTime || !CompareDateTimeL(t.m_endTime, endTime, t.m_endDay, endDay)) /*没要求限时或没超出ddl*/
+		&& 
+		((a_bestRisk < 0) || (a_bestRisk >= 0 && riskAfter <= a_bestRisk))				/*累计风险没超过最佳风险*/
+		) {
+		/*剪枝，处理到达目的地的情况*/
+		if (cityi == destIndex) {	/*到达目的地*/
+			a_bestPlan = a_plan;	/*更新最佳行程plan*/
+			a_bestRisk = riskAfter;	/*更新最佳风险值*/
+			a_plan.pop_back();		/*弹出该方案*/
+			a_visitedFlags.at(t.m_destIndex) = false;
+			/*不再往下遍历(不再考虑延后时间),直接返回,*/
+			/*因为不考虑时间长短的时候,继续走下去风险也是一样的*/
+			/*考虑路上的风险时,则return false,也不再往下遍历,但是主函数应该考虑其他邻居*/
+			return !enableTransRisk;/*主函数收到true后会return,不在考虑其他邻居*/
 		}
 
 		/*正常情况下,加入这个transport没有超时,则从该transport结束的地点和城市开始继续查找遍历*/
-		a_DFS_noRisk(
+		a_DFS(
 			cityi, destIndex,
 			t.m_endDay, endDay,
 			t.m_endTime, endTime,
-			riskAfter, repeat, limTime);
+			riskAfter, enableRepeat, enableLimTime, enableTransRisk);
 	}
 
 
 	/*******************************************************/
 
 	a_plan.pop_back();/*弹出*/
-	a_routeIndices.pop_back();
+	a_visitedFlags.at(t.m_destIndex) = false;
 	return false;
 
 }
@@ -314,15 +335,15 @@ const vector<Transport> TransSystem::GetTransList(int srcIndex, int destIndex, V
 	return:			
 		const vector<Transport>TransSystem	最佳plan数组
 */
-const vector<Transport> TransSystem::FindPlanNoRisk(
+const vector<Transport> TransSystem::FindPlan(
 	int srcIndex, int destIndex, 
 	int startDay, int endDay, 
 	int startTime, int endTime,
-	bool repeat, bool limTime)
+	bool enableRepeat, bool enableLimTime, bool enableTransRisk)
 {
 	a_InitAlgorithm(srcIndex);/*初始化全局变量*/
 	if (CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
-		a_DFS_noRisk(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0, repeat, limTime);/*初始风险值设为0*/
+		a_DFS(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0, enableRepeat, enableLimTime, enableTransRisk);/*初始风险值设为0*/
 	}
 	return a_bestPlan;
 }
@@ -334,6 +355,7 @@ void TransSystem::SetTimeUp()
 		++m_day;
 	}
 }
+
 /*
 工具函数，用来计算两个时刻之间的总时间
 TODO: 现在的算法限制在两个时刻的总时间<23小时

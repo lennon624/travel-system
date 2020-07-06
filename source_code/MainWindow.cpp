@@ -336,14 +336,13 @@ void MainWindow::ShowBestPlan()
 	/*-----------------------计算最佳方案-----------------------------*/
 	//qDebug() << ui_settings.check_limTime->isChecked();
 
-	if (!ui_settings.check_transRisk->isChecked())		/*不考虑路上风险*/
-	{
-		planCache = sys->FindPlanNoRisk(
-			srcIndex, destIndex, startDay, endDay, startTime, endTime,
-			ui_settings.check_repVisit->isChecked(),		/*是否考虑限时*/
-			ui_settings.check_limTime->isChecked());		/*获取用户是否允许重复访问*/
-		SetTransList(ui.listWidget_plan, true, planCache);	/*将它展现在travel页中*/
-	}
+	planCache = sys->FindPlan(
+		srcIndex, destIndex, startDay, endDay, startTime, endTime,
+		ui_settings.check_repVisit->isChecked(),		/*获取用户是否考虑限时*/
+		ui_settings.check_limTime->isChecked(),			/*获取用户是否允许重复访问*/
+		ui_settings.check_transRisk->isChecked());		/*获取用户是否考虑交通工具的风险*/
+	SetTransList(ui.listWidget_plan, true, planCache);	/*将它展现在travel页中*/
+
 	
 
 	/*调整confirm按钮的状态*/
