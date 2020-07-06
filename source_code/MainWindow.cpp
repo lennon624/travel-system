@@ -119,6 +119,7 @@ MainWindow::MainWindow(QWidget* parent)
 		SetTransList(ui.listWidget_plan,true, user->GetPlan());
 		/*切换到myPlan之后当作抛弃搜索结果,也不能confirm*/
 		ui.btn_planConfirm->setEnabled(false);
+		ui.btn_planConfirm->setText("Confirm");
 		});
 
 	/*处理查询最佳plan事件*/
@@ -127,7 +128,24 @@ MainWindow::MainWindow(QWidget* parent)
 	/*处理更新最佳plan事件*/
 	connect(ui.btn_planConfirm, &QPushButton::clicked, [=]() {
 		user->SetNewPlanFlag(true);
+
+		///*提示框,告知用户更新成功*/
+		//QMessageBox msg;
+		//msg.setIcon(QMessageBox::Icon::Information);
+		//msg.setText(
+		//	"Your plan is confirmed.\nYou can see your plan in [MyPlan] after it begin.\nYou can modify it before it started.");
+		//msg.setStandardButtons(QMessageBox::Ok);
+		//msg.setStyleSheet(
+		//	"QWidget{background-color: #35353b;}\
+		//	 QPushButton{background-color: #4891b4;}\
+		//	 QPushButton::hover{background-color: #54aad3;border: 1px solid #46a2da;}\
+		//	 QPushButton::pressed{background-color: #2385b4;border: 1px solid #46a2da;}");
+		//msg.setWindowFlag(Qt::FramelessWindowHint);
+		//msg.exec();
+		
+		/*禁用confirm,改写成confirmed*/
 		ui.btn_planConfirm->setEnabled(false);
+		ui.btn_planConfirm->setText("Confirmed");
 		});
 
 	/*处理弹出和关闭设置页面事件*/
@@ -304,7 +322,11 @@ void MainWindow::UpdatePageTravel()
 	}
 
 	/*由于之前搜的计划过期了，不应该再confirm，所以禁用confirm按钮*/
-	ui.btn_planConfirm->setEnabled(false);
+	if (ui.btn_planConfirm->isEnabled()) {
+		ui.btn_planConfirm->setEnabled(false);
+		ui.btn_planConfirm->setText("Plan Expired"); /*提示过期*/
+	}
+
 
 	/*将日期同步更新(算了不更了)*/
 }
@@ -335,21 +357,38 @@ void MainWindow::ShowBestPlan()
 
 	/*-----------------------计算最佳方案-----------------------------*/
 	//qDebug() << ui_settings.check_limTime->isChecked();
+	if (TransSystem::CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
+		planCache = sys->FindPlan(
+			srcIndex, destIndex, startDay, endDay, startTime, endTime,
+			ui_settings.check_repVisit->isChecked(),		/*获取用户是否考虑限时*/
+			ui_settings.check_limTime->isChecked(),			/*获取用户是否允许重复访问*/
+			ui_settings.check_transRisk->isChecked());		/*获取用户是否考虑交通工具的风险*/
+		SetTransList(ui.listWidget_plan, true, planCache);	/*将它展现在travel页中*/
+	} else {
 
-	planCache = sys->FindPlan(
-		srcIndex, destIndex, startDay, endDay, startTime, endTime,
-		ui_settings.check_repVisit->isChecked(),		/*获取用户是否考虑限时*/
-		ui_settings.check_limTime->isChecked(),			/*获取用户是否允许重复访问*/
-		ui_settings.check_transRisk->isChecked());		/*获取用户是否考虑交通工具的风险*/
-	SetTransList(ui.listWidget_plan, true, planCache);	/*将它展现在travel页中*/
+		/*显示提示框,调整样式*/
+		QMessageBox msg;
+		msg.setIcon(QMessageBox::Icon::Critical);
+		msg.setText(QString("Arrival should be later than\nDAY %1 - %2:00").arg(startDay).arg(startTime));
+		msg.setStandardButtons(QMessageBox::Ok);
+		msg.setStyleSheet(
+			"QWidget{background-color: #35353b;}\
+			 QPushButton{background-color: #4891b4;}\
+			 QPushButton::hover{background-color: #54aad3;border: 1px solid #46a2da;}\
+			 QPushButton::pressed{background-color: #2385b4;border: 1px solid #46a2da;}");
+		msg.setWindowFlag(Qt::FramelessWindowHint);
+		msg.exec();
+	}
 
 	
 
 	/*调整confirm按钮的状态*/
 	if (planCache.empty()) {/*如果获取到的计划是空的,即搜索结果为无解*/
 		ui.btn_planConfirm->setEnabled(false);	/*则不允许用户确认行程*/
+		ui.btn_planConfirm->setText("Confirm");
 	} else{
 		ui.btn_planConfirm->setEnabled(true);	/*允许用户确认行程*/
+		ui.btn_planConfirm->setText("Confirm");
 	}
 }
 

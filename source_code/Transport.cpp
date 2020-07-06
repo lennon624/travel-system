@@ -342,9 +342,7 @@ const vector<Transport> TransSystem::FindPlan(
 	bool enableRepeat, bool enableLimTime, bool enableTransRisk)
 {
 	a_InitAlgorithm(srcIndex);/*初始化全局变量*/
-	if (CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
-		a_DFS(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0, enableRepeat, enableLimTime, enableTransRisk);/*初始风险值设为0*/
-	}
+	a_DFS(srcIndex, destIndex, startDay, endDay, startTime, endTime, 0, enableRepeat, enableLimTime, enableTransRisk);/*初始风险值设为0*/
 	return a_bestPlan;
 }
 

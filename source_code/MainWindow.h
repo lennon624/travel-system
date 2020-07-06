@@ -5,6 +5,7 @@
 #include <vector>
 #include <QAction>
 #include <QProgressBar>
+#include <QMessageBox>
 #include "Transport.h"
 #include "TransportFrame.h"
 #include "ui_MainWindow.h"
@@ -56,3 +57,5 @@ private:
     void OnSettingChanged(int state); /*处理所有的设置变化*/
 
 };
+
+
