@@ -27,18 +27,21 @@ const Vehicle::Attribute Vehicle::GetAttribute(Vehicle::Type type) {
 	switch (type)
 	{
 	case Vehicle::bus:
-		return { "BUS",2,4,2}; 
+		//return { "BUS",2,4,2}; 
+		return { u8"汽车",2,4,2}; 
 		break;
 	case Vehicle::train:
-		return { "TRAIN",4,2,5 };
+		//return { "TRAIN",4,2,5 };
+		return { u8"火车",4,2,5 };
 		break;
 	case Vehicle::plane:
-		return { "PLANE",6,1,9 };
+		//return { "PLANE",6,1,9 };
+		return { u8"飞机",6,1,9 };
 		break;
 	default:
 		break;
 	}
-	return { "NONE", 0, 0 };
+	return { u8"无", 0, 0 };
 }
 
 
@@ -47,9 +50,11 @@ TransSystem::TransSystem()
 	:m_time(0),/*时间为0*/
 	m_day(0),
 	m_cityList(													/*城市列表,名字+风险值*/
-		{ {"Beijing",0.9},{"Guangzhou",0.7},{"Wuhan",0.9},
-		{"ShenZhen",0.5}/*,{"Tianjin",0.5},{"Shanghai",0.5},
-		{"Xinjiang",0.2},{"Xiamen",0.2},{"Sichuan",0.2},{ "Guilin",0.2 }*/ }),
+		{ {u8"成都",0.9}, {u8"西安",0.7}, {u8"太原",0.5},
+		  {u8"北京",0.9}, {u8"沈阳",0.5}, {u8"长沙",0.7},
+		  {u8"武汉",0.5}, {u8"合肥",0.9}, {u8"济南",0.7},
+		  {u8"广州",0.9}, {u8"福州",0.5}, {u8"杭州",0.7}
+		}),
 	m_transMap(CITY_COUNT, vector<Vehicle::Type>(CITY_COUNT)),	/*交通方式图*/
 	m_distMap(CITY_COUNT, vector<int>(CITY_COUNT)),				/*距离图*/
 	m_timeTable(CITY_COUNT, vector<vector<Vehicle::Type>>(CITY_COUNT, vector<Vehicle::Type>(MAX_TIME))),/*三维的时间表*/

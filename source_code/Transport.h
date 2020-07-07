@@ -178,7 +178,7 @@ private:
 
 	/*全局变量,一天24小时以及城市数量*/
 	static const int MAX_TIME = 24;
-	static const int CITY_COUNT = 4;
+	static const int CITY_COUNT = 12;
 
 	void GenRandTransports(Vehicle::Type means, int srcIndex, int destIndex);
 

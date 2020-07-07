@@ -1,17 +1,21 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
+#include <QHboxLayout>
+#include <QVboxLayout>
 #include <QListWidget>
 #include <vector>
 #include <QAction>
 #include <QProgressBar>
 #include <QMessageBox>
-#include "Transport.h"
-#include "TransportFrame.h"
+#include <QPainter>
+#include <QListWidget>
 #include "ui_MainWindow.h"
 #include "ui_SettingsWindow.h"
+#include "Transport.h"
+#include "TransportFrame.h"
 #include "User.h"
-#include "QListWidget"
+#include "MapCanvas.h"
 
 using namespace std;
 class MainWindow : public QMainWindow
@@ -25,6 +29,7 @@ public:
 protected:
 	void timerEvent(QTimerEvent* ev)override;
     void closeEvent(QCloseEvent* ev)override;
+
 private:
     /*Ö÷´°¿Úui*/
     Ui::MainWindowClass ui;
@@ -39,6 +44,9 @@ private:
     QLabel* currTime;
     QLabel* currDay;
     QLabel* currUserStatus;
+
+    /*µØÍ¼Ò³*/
+    MapCanvas* mapCanvas;
 
     User* user;
     TransSystem* sys;

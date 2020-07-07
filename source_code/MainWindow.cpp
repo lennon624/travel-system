@@ -3,11 +3,35 @@
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent),
 	settingsWindow(new QWidget(parent)),
-	user(new User("USERNAME", User::DEFAULT_CITY_INDEX)),
 	sys(new TransSystem)
 	/*gTime(0),
 	gDay(0)*/
 {
+
+	/******************用户选择初始城市界面***************************/
+	int* originIndex = new int(0);/*城市号初始化*/
+	QDialog* chooseDialog = new QDialog(this);/*弹窗*/
+	chooseDialog->setWindowFlag(Qt::FramelessWindowHint);/*删除边框*/
+	QLabel* chooseTitle = new QLabel(u8"请选择您当前所在的城市",chooseDialog);/*标题*/
+	QPushButton* closeDialog = new QPushButton(u8"确定",chooseDialog); /*关闭按钮*/
+	QComboBox* cityCombo = new QComboBox(chooseDialog);	/*下拉选择框*/
+	SetCityList(cityCombo, sys->GetCityList());			/*初始化所有城市列表*/
+	connect(closeDialog, &QPushButton::clicked, [=]() {
+		*originIndex = cityCombo->currentIndex();/*获取城市的值*/
+		chooseDialog->close();					/*关闭窗口*/
+		});
+	/*layout排版*/
+	QVBoxLayout* chooseLayout = new QVBoxLayout(chooseDialog);
+	chooseLayout->addWidget(chooseTitle);
+	chooseLayout->addWidget(cityCombo);
+	chooseLayout->addWidget(closeDialog);
+	/*运行模态窗口阻塞进程*/
+	chooseDialog->exec();
+
+
+	user = new User("USERNAME", *originIndex);	/*设置初始城市*/
+	delete originIndex;							/*删除序号内存*/
+
 	/*初始化ui界面*/
 	ui.setupUi(this);/*主窗口*/
 	ui_settings.setupUi(settingsWindow);/*设置窗口*/
@@ -20,17 +44,24 @@ MainWindow::MainWindow(QWidget* parent)
 
 	/*调整一下setting按钮的尺寸*/
 	ui.btn_planSetting->setFixedSize(QSize(
-		ui.btn_planSearch->height()+9,
-		ui.btn_planSearch->height()+9));
+		ui.btn_planSearch->height()+10,
+		ui.btn_planSearch->height()+10));
 
+	this->setWindowTitle(u8"COVID19低风险旅行模拟系统");
 
-	/*添加状态栏标签*/
+	/*添加状态栏标签+改字体*/
 	currProgress = new QProgressBar(this);
 	currSrcCity = new QLabel(this);
 	currDestCity = new QLabel(this);
 	currTime = new QLabel(this);
 	currDay = new QLabel(this);
 	currUserStatus = new QLabel(this);
+	currProgress->setFont(this->font());
+	currSrcCity->setFont(this->font());
+	currDestCity->setFont(this->font());
+	currTime->setFont(this->font());
+	currDay->setFont(this->font());
+	currUserStatus->setFont(this->font());
 	ui.statusBar->addPermanentWidget(currSrcCity);
 	ui.statusBar->addPermanentWidget(new QLabel(">>", this));
 	ui.statusBar->addPermanentWidget(currProgress);
@@ -40,6 +71,11 @@ MainWindow::MainWindow(QWidget* parent)
 	ui.statusBar->addWidget(currDay);
 	ui.statusBar->addWidget(currUserStatus);
 	
+	/*添加地图页并排版*/
+	mapCanvas = new MapCanvas(ui.page_map);
+	QHBoxLayout* pageMapLayout = new QHBoxLayout(ui.page_map);
+	pageMapLayout->addWidget(mapCanvas);
+
 	///*debug 设置user状态*/
 	//user->UpdatePlan({
 	//	
@@ -119,7 +155,7 @@ MainWindow::MainWindow(QWidget* parent)
 		SetTransList(ui.listWidget_plan,true, user->GetPlan());
 		/*切换到myPlan之后当作抛弃搜索结果,也不能confirm*/
 		ui.btn_planConfirm->setEnabled(false);
-		ui.btn_planConfirm->setText("Confirm");
+		ui.btn_planConfirm->setText(u8"添加计划");
 		});
 
 	/*处理查询最佳plan事件*/
@@ -145,7 +181,7 @@ MainWindow::MainWindow(QWidget* parent)
 		
 		/*禁用confirm,改写成confirmed*/
 		ui.btn_planConfirm->setEnabled(false);
-		ui.btn_planConfirm->setText("Confirmed");
+		ui.btn_planConfirm->setText(u8"添加成功");
 		});
 
 	/*处理弹出和关闭设置页面事件*/
@@ -188,7 +224,7 @@ void MainWindow::timerEvent(QTimerEvent* ev)
 			user->SetNewPlanFlag(false);/*没有newPlan*/
 		}
 		user->UpdateInfo(sys->GetTime(), sys->GetDay());
-		qDebug() << QString::fromStdString(user->GetStatusName());
+		//qDebug() << QString::fromStdString(user->GetStatusName());
 
 		/*更新travel页*/
 		UpdatePageTravel();
@@ -200,7 +236,6 @@ void MainWindow::closeEvent(QCloseEvent* ev)
 {
 	settingsWindow->close();/*顺便把附属窗口关掉*/
 }
-
 
 
 void MainWindow::SetCityList(QComboBox* comboBox, const vector<City>& listCity)
@@ -285,7 +320,7 @@ void MainWindow::UpdateStatusBar()
 		currProgress->setDisabled(true);
 		currProgress->setValue(0);
 
-		currDestCity->setText("NONE");
+		currDestCity->setText("");
 		currSrcCity->setText(QString::fromStdString(
 			sys->GetCityList()
 			.at(user->GetCityIndex())
@@ -295,8 +330,8 @@ void MainWindow::UpdateStatusBar()
 	
 	/*设置日期和时间*/
 	currTime->setText(QString("%1:00").arg(sys->GetTime(), 2, 10, QLatin1Char('0')));
-	currDay->setText(QString("Day %1").arg(sys->GetDay()));
-	currUserStatus->setText(QString(" --- status: %1 --- ").arg(QString::fromStdString(user->GetStatusName())));
+	currDay->setText(QString(u8"第%1天").arg(sys->GetDay()));
+	currUserStatus->setText(QString(" - %1 - ").arg(QString::fromStdString(user->GetStatusName())));
 
 }
 
@@ -307,7 +342,7 @@ void MainWindow::UpdatePageTravel()
 	ui.combo_srcTravel->clear();
 	if (User::status::stay == user->GetStatus()) {
 		/*如果用户没有正在旅行,那么下一次旅行的起始地点为用户位置*/
-		qDebug() << QString::fromStdString(user->GetStatusName());
+		//qDebug() << QString::fromStdString(user->GetStatusName());
 		ui.combo_srcTravel->addItem(
 			QString::fromStdString(
 				sys->GetCityList()
@@ -315,7 +350,7 @@ void MainWindow::UpdatePageTravel()
 				.m_name));
 	} else {
 		/*如果用户正在旅行,那么更新起始地点为当前旅行计划的终点城市*/
-		qDebug() << user->GetPlan().size();
+		//qDebug() << user->GetPlan().size();
 		int srcIndex = user->GetPlan().at(user->GetPlan().size() - 1).m_destIndex;
 		City nextSrc = sys->GetCityList().at(srcIndex);
 		ui.combo_srcTravel->addItem(QString::fromStdString(nextSrc.m_name));
@@ -324,7 +359,7 @@ void MainWindow::UpdatePageTravel()
 	/*由于之前搜的计划过期了，不应该再confirm，所以禁用confirm按钮*/
 	if (ui.btn_planConfirm->isEnabled()) {
 		ui.btn_planConfirm->setEnabled(false);
-		ui.btn_planConfirm->setText("Plan Expired"); /*提示过期*/
+		ui.btn_planConfirm->setText(u8"计划已过期"); /*提示过期*/
 	}
 
 
@@ -367,10 +402,13 @@ void MainWindow::ShowBestPlan()
 	} else {
 
 		/*显示提示框,调整样式*/
-		QMessageBox msg;
+		QMessageBox msg(this);
 		msg.setIcon(QMessageBox::Icon::Critical);
-		msg.setText(QString("Arrival should be later than\nDAY %1 - %2:00").arg(startDay).arg(startTime));
-		msg.setStandardButtons(QMessageBox::Ok);
+		msg.setText(QString(u8"期望到达时间必须设置在\n第 %1 天 %2:00 后。").arg(startDay).arg(startTime));
+		msg.setFont(this->font());
+		QPushButton btn(u8"我知道了",&msg);
+		btn.setFont(this->font());
+		msg.addButton(&btn,QMessageBox::YesRole);
 		msg.setStyleSheet(
 			"QWidget{background-color: #35353b;}\
 			 QPushButton{background-color: #4891b4;}\
@@ -385,10 +423,10 @@ void MainWindow::ShowBestPlan()
 	/*调整confirm按钮的状态*/
 	if (planCache.empty()) {/*如果获取到的计划是空的,即搜索结果为无解*/
 		ui.btn_planConfirm->setEnabled(false);	/*则不允许用户确认行程*/
-		ui.btn_planConfirm->setText("Confirm");
+		ui.btn_planConfirm->setText(u8"未搜索到计划");
 	} else{
 		ui.btn_planConfirm->setEnabled(true);	/*允许用户确认行程*/
-		ui.btn_planConfirm->setText("Confirm");
+		ui.btn_planConfirm->setText(u8"添加计划");
 	}
 }
 

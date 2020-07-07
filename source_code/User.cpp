@@ -23,13 +23,13 @@ const string User::GetStatusName() const
 	switch (m_status)
 	{
 	case User::status::on:
-		return "on";
+		return u8"移动中";
 		break;
 	case User::status::suspend:
-		return "suspend";
+		return u8"等待中";
 		break;
 	case User::status::stay:
-		return "stay";
+		return u8"停留中";
 		break;
 	default:
 		break;

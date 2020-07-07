@@ -33,6 +33,9 @@
     <QtMoc Include="TransportFrame.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="MapCanvas.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -45,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TransportFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MapCanvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,7 +66,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
     <None Include="Diffnes.qss">
       <Filter>Resource Files</Filter>
     </None>
@@ -75,6 +80,9 @@
     <QtUic Include="SettingsWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="MapCanvas.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <Font Include="MONACO.TTF">
@@ -84,6 +92,18 @@
   <ItemGroup>
     <Image Include="img\setting.png">
       <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="img\airplane.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="img\bus.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="img\map.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="img\train.png">
+      <Filter>Source Files</Filter>
     </Image>
   </ItemGroup>
 </Project>

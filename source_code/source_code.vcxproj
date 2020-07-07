@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MapCanvas.cpp" />
     <ClCompile Include="Transport.cpp" />
     <ClCompile Include="TransportFrame.cpp" />
     <ClCompile Include="User.cpp" />
@@ -91,23 +92,28 @@
     <QtMoc Include="MainWindow.h" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="MapCanvas.ui" />
     <QtUic Include="SettingsWindow.ui" />
     <QtUic Include="TransportFrame.ui" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="MapCanvas.h" />
     <ClInclude Include="Transport.h" />
     <QtMoc Include="TransportFrame.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
     <None Include="Diffnes.qss" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="MONACO.TTF" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="img\airplane.png" />
+    <Image Include="img\bus.png" />
+    <Image Include="img\map.png" />
     <Image Include="img\setting.png" />
+    <Image Include="img\train.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

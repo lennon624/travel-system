@@ -3,5 +3,7 @@
         <file>Diffnes.qss</file>
         <file>MONACO.TTF</file>
         <file>img/setting.png</file>
+        <file>img/map.png</file>
+        <file>img/arrow.png</file>
     </qresource>
 </RCC>

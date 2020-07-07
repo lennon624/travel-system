@@ -39,24 +39,24 @@ void TransportFrame::SetTransport(const Transport& trans, const TransSystem& sys
 	QString dName = QString::fromStdString(sys.GetCityList().at(trans.m_destIndex).m_name);
 	QString sName = QString::fromStdString(sys.GetCityList().at(trans.m_srcIndex).m_name);
 	ui->vehicle->setText(QString("<center><span style=\"font-size:18pt;\">%1</span></center>").arg(vName));
-	ui->destCity->setText(QString("<center><span style=\"font-size:10pt;\">%1</span></center>").arg(dName));
-	ui->srcCity->setText(QString("<center><span style=\"font-size:10pt;\">%1</span></center>").arg(sName));
+	ui->destCity->setText(QString("<center><span style=\"font-size:14pt;\">%1</span></center>").arg(dName));
+	ui->srcCity->setText(QString("<center><span style=\"font-size:14pt;\">%1</span></center>").arg(sName));
 	
 	if (viewTrueDay) {
 		ui->srcTime->setText(
-			QString("<center><span style=\"font-size:10pt;\">%1th - %2:00</span></center>")
+			QString(u8"<center><span style=\"font-size:12pt;\">第%1天%2:00</span></center>")
 			.arg(trans.m_startDay)
 			.arg(trans.m_startTime));
 		ui->destTime->setText(
-			QString("<center><span style=\"font-size:10pt;\">%1th - %2:00 </span></center>")
+			QString(u8"<center><span style=\"font-size:12pt;\">第%1天%2:00 </span></center>")
 			.arg(trans.m_endDay)
 			.arg(trans.m_endTime));
 	} else {
 		ui->srcTime->setText(
-			QString("<center><span style=\"font-size:10pt;\">%1:00</span></center>")
+			QString(u8"<center><span style=\"font-size:12pt;\">%1:00</span></center>")
 			.arg(trans.m_startTime));
 		ui->destTime->setText(
-			QString("<center><span style=\"font-size:10pt;\">%1:00 +%2</span></center>")
+			QString(u8"<center><span style=\"font-size:12pt;\">%1:00 +%2</span></center>")
 			.arg(trans.m_endTime)
 			.arg(trans.m_endDay - trans.m_startDay));
 	}

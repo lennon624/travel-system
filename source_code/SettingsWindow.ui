@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>330</width>
-    <height>158</height>
+    <width>335</width>
+    <height>226</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,6 +18,12 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="font">
+   <font>
+    <family>Microsoft YaHei UI</family>
+    <pointsize>13</pointsize>
+   </font>
   </property>
   <property name="contextMenuPolicy">
    <enum>Qt::DefaultContextMenu</enum>
@@ -28,8 +34,14 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QLabel" name="label_title">
+     <property name="font">
+      <font>
+       <family>Microsoft YaHei UI</family>
+       <pointsize>18</pointsize>
+      </font>
+     </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;POLICY SETTINGS&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;策略设置&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>
@@ -42,7 +54,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Consider Limit Time</string>
+      <string>必须在给定时间日期前到达</string>
      </property>
     </widget>
    </item>
@@ -55,7 +67,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Consider Risk On The Way</string>
+      <string>考虑交通工具乘坐途中的风险</string>
      </property>
     </widget>
    </item>
@@ -71,7 +83,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Ennable Repeat Visits</string>
+      <string>允许重复经过同一城市</string>
      </property>
      <property name="checked">
       <bool>false</bool>
@@ -81,7 +93,7 @@
    <item row="4" column="0" alignment="Qt::AlignHCenter">
     <widget class="QPushButton" name="btn_close">
      <property name="text">
-      <string>close</string>
+      <string>关闭</string>
      </property>
     </widget>
    </item>

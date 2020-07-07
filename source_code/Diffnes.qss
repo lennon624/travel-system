@@ -27,7 +27,7 @@ QWidget
 	color: #fff;
 	selection-background-color: #fff;
 	selection-color: #000;
-	font: "Monaco";
+	font-family: "Microsoft YaHei";
 }
 
 
@@ -268,8 +268,8 @@ QComboBox
 {
     background-color: #4a5157;
     padding-left: 6px;
-	padding-bottom: 2px;
-	padding-top: 2px;
+	padding-bottom: 6px;
+	padding-top: 6px;
     color: #fff;
     height: 28px;
 	border-radius: 4px;
