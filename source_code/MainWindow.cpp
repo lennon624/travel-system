@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget* parent)
 	/******************用户选择初始城市界面***************************/
 	int* originIndex = new int(0);/*城市号初始化*/
 	QDialog* chooseDialog = new QDialog(this);/*弹窗*/
-	chooseDialog->setWindowFlag(Qt::FramelessWindowHint);/*删除边框*/
+	chooseDialog->setWindowTitle(u8"旅行模拟系统");
 	QLabel* chooseTitle = new QLabel(u8"请选择您当前所在的城市",chooseDialog);/*标题*/
 	QPushButton* closeDialog = new QPushButton(u8"确定",chooseDialog); /*关闭按钮*/
 	QComboBox* cityCombo = new QComboBox(chooseDialog);	/*下拉选择框*/
@@ -214,6 +214,7 @@ void MainWindow::timerEvent(QTimerEvent* ev)
 	if (hTimerId == ev->timerId()) {
 		/*更新系统日期*/
 		sys->SetTimeUp();
+		
 		/*更新状态栏*/
 		UpdateStatusBar();
 
@@ -245,7 +246,7 @@ void MainWindow::SetCityList(QComboBox* comboBox, const vector<City>& listCity)
 	}
 }
 
-void MainWindow::SetTransList(QListWidget* listWidget,bool viewTrueDay, const vector<Transport>& listTrans)
+void MainWindow::SetTransList(QListWidget* listWidget, bool viewTrueDay, const vector<Transport>& listTrans)
 {
 	//disconnect
 	listWidget->disconnect();

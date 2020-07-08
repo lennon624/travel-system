@@ -23,20 +23,21 @@ Vehicle::~Vehicle()
 }
 
 const Vehicle::Attribute Vehicle::GetAttribute(Vehicle::Type type) {
-	/*返回值名字，发车间隔，单位里程所需时间，单位时间风险值*/
+	/*返回值名字，发车间隔，单位里程所需时间(以飞机为基准)，单位时间风险值*/
 	switch (type)
 	{
 	case Vehicle::bus:
 		//return { "BUS",2,4,2}; 
-		return { u8"汽车",2,4,2}; 
+		return { u8"汽车",6,4,2}; 
 		break;
 	case Vehicle::train:
 		//return { "TRAIN",4,2,5 };
-		return { u8"火车",4,2,5 };
+		return { u8"火车",8,2,5 };
 		break;
 	case Vehicle::plane:
 		//return { "PLANE",6,1,9 };
-		return { u8"飞机",6,1,9 };
+		return { u8"飞机",12,1,9 };
+		/*24小时一台,每个单位里程需要1小时,每小时*/
 		break;
 	default:
 		break;
@@ -66,25 +67,55 @@ TransSystem::TransSystem()
 {
 
 	/*确定交通方式图*/
-	m_transMap[0][1] = Vehicle::plane | Vehicle::bus;	/*Beijing-Guangzhou*/
-	m_transMap[1][0] = Vehicle::plane;
-	m_transMap[0][2] = Vehicle::train | Vehicle::bus;	/*Beijing-Wuhan*/
-	m_transMap[2][0] = Vehicle::bus | Vehicle::train;
-	m_transMap[1][3] = Vehicle::bus | Vehicle::train | Vehicle::plane;	/*Guangzhou-Shenzhen*/
-	m_transMap[3][1] = Vehicle::train | Vehicle::bus;
-	m_transMap[3][2] = Vehicle::train;					/*Wuhan-Shenzhen*/
-	m_transMap[2][3] = Vehicle::train;
-	m_transMap[0][3] = Vehicle::train;					/*Shenzhen-Beijing*/
-	m_transMap[3][0] = Vehicle::train;
-	/*直接读入交通方式图 用类似下图的方式也行*/
+	//m_transMap[0][1] = Vehicle::plane | Vehicle::bus;	/*Beijing-Guangzhou*/
+	//m_transMap[1][0] = Vehicle::plane;
+	//m_transMap[0][2] = Vehicle::train | Vehicle::bus;	/*Beijing-Wuhan*/
+	//m_transMap[2][0] = Vehicle::bus | Vehicle::train;
+	//m_transMap[1][3] = Vehicle::bus | Vehicle::train | Vehicle::plane;	/*Guangzhou-Shenzhen*/
+	//m_transMap[3][1] = Vehicle::train | Vehicle::bus;
+	//m_transMap[3][2] = Vehicle::train;					/*Wuhan-Shenzhen*/
+	//m_transMap[2][3] = Vehicle::train;
+	//m_transMap[0][3] = Vehicle::train;					/*Shenzhen-Beijing*/
+	//m_transMap[3][0] = Vehicle::train;
 
-	/*确定交通距离图: */
+	m_transMap = {
+		{0, 1, 0, 4, 0, 0, 2, 0, 0, 4, 0, 0},
+		{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+		{0, 1, 0, 1, 0, 0, 2, 0, 2, 0, 0, 0},
+		{0, 0, 1, 0, 1, 0, 0, 0, 1, 4, 0, 0},
+		{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0},
+		{2, 1, 2, 0, 0, 1, 0, 1, 0, 0, 2, 0},
+		{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		{0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 2},
+		{4, 0, 0, 4, 0, 1, 0, 0, 0, 0, 1, 0},
+		{0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0, 1},
+		{0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 1, 0} };
+
+	/*确定交通距离图,对称矩阵: */
 	m_distMap = {
-		{0,4,2,4},
-		{4,0,2,1},
-		{2,2,0,2},
-		{4,1,2,0}
-	};
+		{0, 2, 4, 5, 7, 3, 3, 4, 5, 5, 6, 6},
+		{2, 0, 2, 3, 5, 3, 2, 3, 4, 5, 5, 5},
+		{4, 2, 0, 2, 3, 4, 3, 3, 2, 6, 5, 4},
+		{5, 3, 2, 0, 2, 5, 4, 3, 2, 6, 5, 4},
+		{7, 5, 3, 2, 0, 6, 5, 4, 2, 7, 6, 5},
+		{3, 3, 4, 5, 6, 0, 1, 4, 4, 2, 2, 3},
+		{3, 2, 3, 4, 5, 1, 0, 1, 3, 2, 2, 2},
+		{4, 3, 3, 3, 4, 4, 1, 0, 2, 3, 2, 1},
+		{5, 4, 2, 2, 2, 4, 3, 2, 0, 5, 4, 3},
+		{5, 5, 6, 6, 7, 2, 2, 3, 5, 0, 2, 3},
+		{6, 5, 5, 5, 6, 2, 2, 2, 4, 2, 0, 1},
+		{6, 5, 4, 4, 5, 3, 2, 1, 3, 3, 1, 0}};
+
+	//ifstream ifs("distance.csv");
+	//for (int i = 0; i < CITY_COUNT; ++i) {
+
+	//}
+	//ifs.close();
+
+	/*从csv中读入交通距离图*/
+
+
 
 	/*对于可以连通的线路,对于每个交通方式生成24小时内的车次*/
 	srand((int)time(0));	/*设置随机数种子*/

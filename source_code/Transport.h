@@ -38,7 +38,7 @@ public:
 	typedef unsigned char Type;
 
 	/*定义各种交通方式的标志,用二进制的一个位表示*/
-	static const Type bus = 0x01;
+	static const Type bus   = 0x01;
 	static const Type train = 0x02;
 	static const Type plane = 0x04;
 
@@ -48,11 +48,6 @@ public:
 		string  name;
 		int m_interval;	//两次航班的固定间隔
 		int m_distTimes;
-		
-		
-		
-		
-		
 		//速度,需要的时间是distMap[a][b]的多少倍
 		int m_risk;		//每小时风险值
 	};
@@ -114,6 +109,7 @@ struct Transport
 	Discription:	表示一个车次在时刻表中的结点。
 	Creation Date:	2020/5/26
 */
+
 //struct TransNode
 //{
 //	TransNode(const Transport& transport)

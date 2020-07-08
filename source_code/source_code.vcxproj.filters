@@ -103,7 +103,7 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="img\train.png">
-      <Filter>Source Files</Filter>
+      <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
 </Project>
