@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MapCanvas.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Transport.h" />
     <QtMoc Include="TransportFrame.h" />
     <ClInclude Include="User.h" />
@@ -109,11 +110,17 @@
     <Font Include="MONACO.TTF" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="icon1.ico" />
     <Image Include="img\airplane.png" />
     <Image Include="img\bus.png" />
+    <Image Include="img\icon.ico" />
+    <Image Include="img\icon1.ico" />
     <Image Include="img\map.png" />
     <Image Include="img\setting.png" />
     <Image Include="img\train.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="source_code.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

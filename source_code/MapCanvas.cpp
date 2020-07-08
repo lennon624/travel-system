@@ -130,7 +130,7 @@ void MapCanvas::paintEvent(QPaintEvent* ev)
 			xe = (xe - xs * 1.0) * m_currProgress / 100 + xs;	/*当前进度的终点坐标*/
 			ye = (ye - ys * 1.0) * m_currProgress / 100 + ys;
 			//calcVertexes(xs, ys, xe, ye, x1, y1, x2, y2);		/*计算箭头坐标*/
-			pen.setColor(QColor(0, 174, 49));					/*绿色*/
+			//pen.setColor(QColor(0, 174, 49));					/*绿色*/
 			pen.setStyle(Qt::SolidLine);						/*虚线*/
 			p.setPen(pen);
 			p.drawLine(xs, ys, xe, ye);							/*画线*/

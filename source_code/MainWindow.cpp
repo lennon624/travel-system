@@ -14,13 +14,13 @@ MainWindow::MainWindow(QWidget* parent)
 	QDialog* chooseDialog = new QDialog(this);/*弹窗*/
 	chooseDialog->setWindowTitle(u8"旅行模拟系统");
 	QPushButton* closeDialog = new QPushButton(u8"确定",chooseDialog); /*关闭按钮*/
-	QLabel* timeTitle = new QLabel(u8"请选择时间比例(秒/小时)", chooseDialog);/*标题*/
+	QLabel* timeTitle = new QLabel(u8"请选择时间比例(秒/小时):", chooseDialog);/*标题*/
 	QComboBox* timeCombo = new QComboBox(chooseDialog); /*选择时间框*/
 	timeCombo->addItem("1 : 1");
 	timeCombo->addItem("2 : 1");
 	timeCombo->addItem("5 : 1");
 	timeCombo->addItem(u8"10 : 1   课设要求");
-	QLabel* chooseTitle = new QLabel(u8"请选择您当前所在的城市", chooseDialog);/*标题*/
+	QLabel* chooseTitle = new QLabel(u8"请选择您当前所在的城市:", chooseDialog);/*标题*/
 	QComboBox* cityCombo = new QComboBox(chooseDialog);	/*选择城市框*/
 	SetCityList(cityCombo, sys->GetCityList());			/*初始化所有城市列表*/
 	connect(closeDialog, &QPushButton::clicked, [=]() {
@@ -29,6 +29,9 @@ MainWindow::MainWindow(QWidget* parent)
 		MS_PER_H =  msec[timeCombo->currentIndex()];	/*获取每小时多少秒*/
 		chooseDialog->close();					/*关闭窗口*/
 		});
+	QLabel* author = new QLabel("<center style=\"font-family:consolas;font-size:12pt;\"> \
+										github.com/tkoniy \
+								</center>", chooseDialog);
 	/*layout排版*/
 	QVBoxLayout* chooseLayout = new QVBoxLayout(chooseDialog);
 	chooseLayout->addWidget(timeTitle);
@@ -36,6 +39,7 @@ MainWindow::MainWindow(QWidget* parent)
 	chooseLayout->addWidget(chooseTitle);
 	chooseLayout->addWidget(cityCombo);
 	chooseLayout->addWidget(closeDialog);
+	chooseLayout->addWidget(author);
 	/*运行模态窗口阻塞进程*/
 	chooseDialog->exec();
 
