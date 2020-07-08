@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget* parent)
 	/*gTime(0),
 	gDay(0)*/
 {
+	this->move(400, 60);
 
 	/******************用户选择初始城市界面***************************/
 	int* originIndex = new int(0);/*城市号初始化*/
