@@ -12,21 +12,33 @@ MainWindow::MainWindow(QWidget* parent)
 	int* originIndex = new int(0);/*城市号初始化*/
 	QDialog* chooseDialog = new QDialog(this);/*弹窗*/
 	chooseDialog->setWindowTitle(u8"旅行模拟系统");
-	QLabel* chooseTitle = new QLabel(u8"请选择您当前所在的城市",chooseDialog);/*标题*/
 	QPushButton* closeDialog = new QPushButton(u8"确定",chooseDialog); /*关闭按钮*/
-	QComboBox* cityCombo = new QComboBox(chooseDialog);	/*下拉选择框*/
+	QLabel* timeTitle = new QLabel(u8"请选择时间比例(秒/小时)", chooseDialog);/*标题*/
+	QComboBox* timeCombo = new QComboBox(chooseDialog); /*选择时间框*/
+	timeCombo->addItem("1 : 1");
+	timeCombo->addItem("2 : 1");
+	timeCombo->addItem("5 : 1");
+	timeCombo->addItem(u8"10 : 1   课设要求");
+	QLabel* chooseTitle = new QLabel(u8"请选择您当前所在的城市", chooseDialog);/*标题*/
+	QComboBox* cityCombo = new QComboBox(chooseDialog);	/*选择城市框*/
 	SetCityList(cityCombo, sys->GetCityList());			/*初始化所有城市列表*/
 	connect(closeDialog, &QPushButton::clicked, [=]() {
 		*originIndex = cityCombo->currentIndex();/*获取城市的值*/
+		int msec[4] = { 1000, 2000,5000,10000 };
+		MS_PER_H =  msec[timeCombo->currentIndex()];	/*获取每小时多少秒*/
 		chooseDialog->close();					/*关闭窗口*/
 		});
 	/*layout排版*/
 	QVBoxLayout* chooseLayout = new QVBoxLayout(chooseDialog);
+	chooseLayout->addWidget(timeTitle);
+	chooseLayout->addWidget(timeCombo);
 	chooseLayout->addWidget(chooseTitle);
 	chooseLayout->addWidget(cityCombo);
 	chooseLayout->addWidget(closeDialog);
 	/*运行模态窗口阻塞进程*/
 	chooseDialog->exec();
+
+	/**********************************************************************/
 
 
 	user = new User("USERNAME", *originIndex);	/*设置初始城市*/
@@ -75,7 +87,7 @@ MainWindow::MainWindow(QWidget* parent)
 	mapCanvas = new MapCanvas(ui.page_map);
 	QHBoxLayout* pageMapLayout = new QHBoxLayout(ui.page_map);
 	pageMapLayout->addWidget(mapCanvas);
-
+	
 	///*debug 设置user状态*/
 	//user->UpdatePlan({
 	//	
@@ -218,15 +230,27 @@ void MainWindow::timerEvent(QTimerEvent* ev)
 		/*更新状态栏*/
 		UpdateStatusBar();
 
-		/*更新乘客状态*/
-		if (user->GetStatus() == User::status::stay
-			&& user->HaveNewPlan()) {	/*如果当前没有正在执行的计划且cachePlan有计划时*/
-			user->UpdatePlan(planCache);/*则开始执行缓存的计划*/
-			user->SetNewPlanFlag(false);/*没有newPlan*/
+		/*更新乘客状态,更新地图*/
+		if (user->GetStatus() == User::status::stay)
+			if (user->HaveNewPlan()) {		/*如果当前没有正在执行的计划且cachePlan有计划时*/
+				user->UpdatePlan(planCache);/*则开始执行缓存的计划,状态变成suspend*/
+				user->SetNewPlanFlag(false);/*没有newPlan*/
+
+				/*更新地图中的plan*/
+				mapCanvas->AddPlan(planCache);
+
+			} else if (!mapCanvas->PlanEmpty()) {/*如果当前没正在执行的计划且mapCanvas还没同步*/
+				
+				/*清空plan*/
+				mapCanvas->ClearPlan();
 		}
+
 		user->UpdateInfo(sys->GetTime(), sys->GetDay());
 		//qDebug() << QString::fromStdString(user->GetStatusName());
 
+		/*刷新并显示状态,将*/
+		qDebug() << QString::fromStdString(user->GetStatusName());
+		mapCanvas->UpdateStatus(user->GetPlanIndex(), user->GetProgress());
 		/*更新travel页*/
 		UpdatePageTravel();
 
@@ -283,7 +307,12 @@ void MainWindow::UpdateStatusBar()
 			user->GetTransport().m_startDay,
 			sys->GetDay()
 		);
-		currProgress->setValue(pastTime * 100 / totalTime);
+		int progress = pastTime * 100 / totalTime;	/*计算进度*/
+		currProgress->setValue(progress);			/*更新到状态栏*/
+		user->SetProgress(progress);				/*更新给用户*/
+		
+		/*修个bug,到达100的时候强行画一次图*/
+		mapCanvas->UpdateStatus(user->GetPlanIndex(), user->GetProgress());
 
 		/*设置起始和目的城市*/
 		currSrcCity->setText(
@@ -302,6 +331,8 @@ void MainWindow::UpdateStatusBar()
 		/*设置当前transport的进度为0*/
 		currProgress->setDisabled(false);
 		currProgress->setValue(0);
+		/*更新进度给用户*/
+		user->SetProgress(0);
 
 		/*设置起始和目的城市*/
 		currSrcCity->setText(
@@ -320,6 +351,8 @@ void MainWindow::UpdateStatusBar()
 		/*设置当前transport的进度为0且禁用进度条*/
 		currProgress->setDisabled(true);
 		currProgress->setValue(0);
+		/*更新给用户*/
+		user->SetProgress(0);
 
 		currDestCity->setText("");
 		currSrcCity->setText(QString::fromStdString(
@@ -433,12 +466,8 @@ void MainWindow::ShowBestPlan()
 
 void MainWindow::OnSettingChanged(int state)
 {
-	/*不限时也不考虑交通方式的风险的情况下，不可以选择允许重复访问*/
-
-	/*如果第一第二个checkbox中任意一个被取消的时候,查看另一个,如果也被取消了,那就设置第三个选项为disable和false*/
-	/*其他情况下,设置第三个框框为enable*/
-	if(!ui_settings.check_limTime->isChecked()			
-		&& !ui_settings.check_transRisk->isChecked()) {/*两个都没有打勾*/
+	/*不限时的情况下，不可以选择允许重复访问*/
+	if(!ui_settings.check_limTime->isChecked()) {/*限时没打勾*/
 		ui_settings.check_repVisit->setEnabled(false);	/*禁用第三个*/
 		ui_settings.check_repVisit->setChecked(false);	/*取消第三个勾*/
 	} else {

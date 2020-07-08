@@ -34,9 +34,11 @@ public:
 	const string& GetName() const { return m_name; }					/*获取用户名*/
 	const string GetStatusName ()const;									/*获取状态名称*/
 	const User::status GetStatus()const { return m_status; }			/*获取状态*/
-	const int& GetCityIndex() const { return m_cityIndex; }					/*获取当前城市或正在离开的城市*/
 	const Transport& GetTransport()const { return m_plan[m_planIndex]; }/*获取当前正在执行的航班*/
 	const vector<Transport>& GetPlan()const { return m_plan; }			/*获取整个计划*/
+	int GetProgress()const { return m_progress; }						/*获取当前进度*/
+	int GetCityIndex() const { return m_cityIndex; }					/*获取当前城市或正在离开的城市*/
+	int GetPlanIndex() const { return m_planIndex; }					/*获取当前行程在计划中的编号*/
 	const bool HaveNewPlan()const { return m_newPlanFlag; }				/*查询用户是否有新的计划待接收*/
 
 
@@ -44,19 +46,23 @@ public:
 	//void SetCity(const City& city) { m_city = city; }
 	void SetCityIndex(int cityIndex) { m_cityIndex = cityIndex; }
 	void SetNewPlanFlag(bool flag) { m_newPlanFlag = flag; }
+	void SetProgress(int progress) { m_progress = progress; }
 
 	void UpdatePlan(const vector<Transport>& plan);
 
 	void UpdateInfo(int time, int day);
+
+
 	
 
 private:
 
 	string m_name;				/*名字*/
 	status m_status;			/*当前状态*/
-	int  m_cityIndex;				/*当前所在城市*/
+	int  m_cityIndex;			/*当前所在城市*/
 	int m_planIndex;			/*当前进行的行程在计划中的位置*/
 	vector<Transport> m_plan;	/*当前选择的出行计划直接存transport,避免回收问题*/
 	bool m_newPlanFlag;			/*当前是否申请了新的计划*/
+	int m_progress;				/*当前进度*/
 };
 

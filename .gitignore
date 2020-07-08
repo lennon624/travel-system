@@ -338,3 +338,10 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/source_code/img/MapPin.png
+/source_code/img/pin.png
+/source_code/img/emptyMap.png
+/source_code/img/colorMap4Mb.png
+/source_code/img/colorMap.png
+/source_code/img/arrow.png
+/source_code/distance.csv

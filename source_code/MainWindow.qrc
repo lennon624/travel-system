@@ -4,6 +4,8 @@
         <file>MONACO.TTF</file>
         <file>img/setting.png</file>
         <file>img/map.png</file>
-        <file>img/arrow.png</file>
+        <file>img/airplane.png</file>
+        <file>img/bus.png</file>
+        <file>img/train.png</file>
     </qresource>
 </RCC>
