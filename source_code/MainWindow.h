@@ -64,6 +64,7 @@ private:
     void UpdatePageTravel();
     void ShowBestPlan();
     void OnSettingChanged(int state); /*处理所有的设置变化*/
+    void WaitForConfirm(); /*点击按钮后等待confirm，停止计时器，禁用其他组件*/
 
     void logCout(const QString& str) {     /*打印函数*/
         static int i = 0;

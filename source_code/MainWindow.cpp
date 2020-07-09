@@ -205,6 +205,9 @@ MainWindow::MainWindow(QWidget* parent)
 	/*处理查询最佳plan事件*/
 	connect(ui.btn_planSearch, &QPushButton::clicked, this, &MainWindow::ShowBestPlan);
 	
+
+
+
 	/*处理更新最佳plan事件*/
 	connect(ui.btn_planConfirm, &QPushButton::clicked, [=]() {
 		user->SetNewPlanFlag(true);
@@ -212,10 +215,37 @@ MainWindow::MainWindow(QWidget* parent)
 		logCout(u8"用户已确认添加以下新计划：" + TransListToQString(planCache));
 
 		/*用户已将最佳计划添加到*/
-		/*禁用confirm,改写成confirmed*/
+		hTimerId = startTimer(MS_PER_H);/*重启计时器*/
+
+		/*禁用confirm和cancel,改写成confirmed*/
 		ui.btn_planConfirm->setEnabled(false);
 		ui.btn_planConfirm->setText(u8"添加成功");
+		ui.btn_planCancel->setEnabled(false);
+
+		/*启用四个无辜的按钮*/
+		ui.btn_pMap->setEnabled(true);
+		ui.btn_pTravel->setEnabled(true);
+		ui.btn_pTrans->setEnabled(true);
+		ui.btn_planMy->setEnabled(true);
+
 		});
+
+	/*处理取消最佳plan事件*/
+	connect(ui.btn_planCancel, &QPushButton::clicked, [=]() {
+		ui.btn_planConfirm->setEnabled(false);
+		ui.btn_planConfirm->setText(u8"添加计划");
+		ui.btn_planCancel->setEnabled(false);
+		hTimerId = startTimer(MS_PER_H);/*重启计时器*/
+
+		/*启用四个无辜的按钮*/
+		ui.btn_pMap->setEnabled(true);
+		ui.btn_pTravel->setEnabled(true);
+		ui.btn_pTrans->setEnabled(true);
+		ui.btn_planMy->setEnabled(true);
+
+		});
+
+
 
 	/*处理弹出和关闭设置页面事件*/
 	connect(ui.btn_planSetting, &QPushButton::clicked, [=]() {
@@ -471,15 +501,30 @@ void MainWindow::ShowBestPlan()
 		.arg(ui_settings.check_transRisk->isChecked() ? u8"考虑乘坐途中风险" : u8"不考虑乘坐途中风险")
 		);
 	
-		if (TransSystem::CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
+	if (TransSystem::CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
 		planCache = sys->FindPlan(
 			srcIndex, destIndex, startDay, endDay, startTime, endTime,
 			ui_settings.check_repVisit->isChecked(),		/*获取用户是否考虑限时*/
 			ui_settings.check_limTime->isChecked(),			/*获取用户是否允许重复访问*/
 			ui_settings.check_transRisk->isChecked());		/*获取用户是否考虑交通工具的风险*/
 		SetTransList(ui.listWidget_plan, true, planCache);	/*将它展现在travel页中*/
-		
+
 		logCout(u8"查询成功, 计划为: " + TransListToQString(planCache));
+
+
+
+		/*调整confirm按钮的状态*/
+		if (planCache.empty()) {/*如果获取到的计划是空的,即搜索结果为无解*/
+			ui.btn_planConfirm->setEnabled(false);	/*则不允许用户确认行程*/
+			ui.btn_planConfirm->setText(u8"未搜索到计划");
+
+		} else {
+			ui.btn_planConfirm->setEnabled(true);	/*允许用户确认行程*/
+			ui.btn_planConfirm->setText(u8"添加计划");
+
+			WaitForConfirm();/*停止系统，等待确认*/
+		}
+
 
 	} else {
 
@@ -504,14 +549,15 @@ void MainWindow::ShowBestPlan()
 
 	
 
-	/*调整confirm按钮的状态*/
-	if (planCache.empty()) {/*如果获取到的计划是空的,即搜索结果为无解*/
-		ui.btn_planConfirm->setEnabled(false);	/*则不允许用户确认行程*/
-		ui.btn_planConfirm->setText(u8"未搜索到计划");
-	} else{
-		ui.btn_planConfirm->setEnabled(true);	/*允许用户确认行程*/
-		ui.btn_planConfirm->setText(u8"添加计划");
-	}
+	///*调整confirm按钮的状态*/
+	//if (planCache.empty()) {/*如果获取到的计划是空的,即搜索结果为无解*/
+	//	ui.btn_planConfirm->setEnabled(false);	/*则不允许用户确认行程*/
+	//	ui.btn_planConfirm->setText(u8"未搜索到计划");
+
+	//} else{
+	//	ui.btn_planConfirm->setEnabled(true);	/*允许用户确认行程*/
+	//	ui.btn_planConfirm->setText(u8"添加计划");
+	//}
 }
 
 void MainWindow::OnSettingChanged(int state)
@@ -524,4 +570,21 @@ void MainWindow::OnSettingChanged(int state)
 		ui_settings.check_repVisit->setEnabled(true);	/*其他情况下允许选择允许重复*/
 	}
 	
+}
+
+void MainWindow::WaitForConfirm()
+{
+	/*停止计时器*/
+	killTimer(hTimerId);
+	hTimerId = -1;		/*id小于0的时候,暂停，可以根据该信号处理其他事件*/
+	
+	/*点亮取消按钮,该按钮只有在事件暂停的时候才能用*/
+
+	ui.btn_planCancel->setEnabled(true);
+	/*禁用其他所有的组件和按钮*/
+	//this->setDisabled(true);
+	ui.btn_pMap->setEnabled(false);
+	ui.btn_pTravel->setEnabled(false);
+	ui.btn_pTrans->setEnabled(false);
+	ui.btn_planMy->setEnabled(false);
 }

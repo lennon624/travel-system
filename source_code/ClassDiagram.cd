@@ -40,10 +40,10 @@
       <FileName>User.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MainWindow" Collapsed="true">
-    <Position X="0.5" Y="0.5" Width="1.5" />
+  <Class Name="MainWindow">
+    <Position X="0.5" Y="0.5" Width="3" />
     <TypeIdentifier>
-      <HashCode>CAACAAQAAAAAEAJQBAAMgADCgAAggAAAAAAAAIEQAQA=</HashCode>
+      <HashCode>CAACAAQAAAAAEAJQBAAMgADCgAAggAAAAAAAAIUQAQA=</HashCode>
       <FileName>MainWindow.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -62,7 +62,7 @@
     </TypeIdentifier>
   </Class>
   <Struct Name="City" Collapsed="true">
-    <Position X="0.5" Y="2.75" Width="1.5" />
+    <Position X="5.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>EAAAAAAAAAAAAAAIAAAAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Transport.h</FileName>
