@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget* parent)
 	int* originIndex = new int(0);/*城市号初始化*/
 	QDialog* chooseDialog = new QDialog(this);/*弹窗*/
 	chooseDialog->setWindowTitle(u8"旅行模拟系统");
+	chooseDialog->setWindowIcon(QIcon(":/img/airplane.png"));
 	QPushButton* closeDialog = new QPushButton(u8"确定",chooseDialog); /*关闭按钮*/
 	QLabel* timeTitle = new QLabel(u8"请选择时间比例(秒/小时):", chooseDialog);/*标题*/
 	QComboBox* timeCombo = new QComboBox(chooseDialog); /*选择时间框*/

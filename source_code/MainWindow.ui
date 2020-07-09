@@ -27,7 +27,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="MainWindow.qrc">
-    <normaloff>:/img/icon.ico</normaloff>:/img/icon.ico</iconset>
+    <normaloff>:/img/airplane.png</normaloff>:/img/airplane.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
