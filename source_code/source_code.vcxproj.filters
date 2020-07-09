@@ -72,6 +72,7 @@
     <None Include="Diffnes.qss">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="MainWindow.ui">

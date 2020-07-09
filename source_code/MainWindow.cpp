@@ -7,7 +7,14 @@ MainWindow::MainWindow(QWidget* parent)
 	/*gTime(0),
 	gDay(0)*/
 {
+	/*清空日志*/
+	ofstream ofs("travel.log");
+	ofs.close();
+
+	logCout(u8"COVID低风险疫情模拟系统 - 作者:邓杨燊");
+
 	this->move(400, 60);
+
 
 	/******************用户选择初始城市界面***************************/
 	int* originIndex = new int(0);/*城市号初始化*/
@@ -45,7 +52,11 @@ MainWindow::MainWindow(QWidget* parent)
 	chooseDialog->exec();
 
 	/**********************************************************************/
-
+	
+	/*打印系统信息*/
+	logCout(QString(u8"模拟系统初始化已完成,用户选择的起始城市为 %1, 每 %2 秒系统时间前进一小时")
+		.arg(QString::fromStdString(sys->GetCityList().at(*originIndex).m_name))
+		.arg(MS_PER_H / 1000));
 
 	user = new User("USERNAME", *originIndex);	/*设置初始城市*/
 	delete originIndex;							/*删除序号内存*/
@@ -133,12 +144,17 @@ MainWindow::MainWindow(QWidget* parent)
 	/*处理切换页面事件*/
 	connect(ui.btn_pMap, &QPushButton::clicked, [=]() {
 		ui.stackedWidget->setCurrentWidget(ui.page_map);
+		logCout(u8"用户切换到地图页面");
 		});
 	connect(ui.btn_pTravel, &QPushButton::clicked, [=]() {
 		ui.stackedWidget->setCurrentWidget(ui.page_travel);
+		logCout(u8"用户切换到旅行页面");
+
 		});
 	connect(ui.btn_pTrans, &QPushButton::clicked, [=]() {
 		ui.stackedWidget->setCurrentWidget(ui.page_trans);
+		logCout(u8"用户切换到时刻表页面");
+
 		});
 
 	/*处理鼠标点击城市事件*/
@@ -158,6 +174,10 @@ MainWindow::MainWindow(QWidget* parent)
 
 		int destIndex = ui.combo_destCity->currentIndex();/*获取起始城市索引*/
 		SetTransList(ui.listWidget_trans, false, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
+		logCout(QString(u8"用户正在查询%1->%2直达的时刻表")
+			.arg(QString::fromStdString(sys->GetCityList().at(srcIndex).m_name))
+			.arg(QString::fromStdString(sys->GetCityList().at(destIndex).m_name))
+		);
 		});
 
 	/*处理终点城市更换事件*/
@@ -166,6 +186,10 @@ MainWindow::MainWindow(QWidget* parent)
 
 		int srcIndex = ui.combo_srcCity->currentIndex();/*获取起始城市索引*/
 		SetTransList(ui.listWidget_trans,false, sys->GetTransList(srcIndex, destIndex, Vehicle::all));/*修改时刻表*/
+		logCout(QString(u8"用户正在查询%1->%2直达的时刻表")
+			.arg(QString::fromStdString(sys->GetCityList().at(srcIndex).m_name))
+			.arg(QString::fromStdString(sys->GetCityList().at(destIndex).m_name))
+		);
 		});
 
 	/*处理查询当前正在执行的plan事件*/
@@ -174,6 +198,8 @@ MainWindow::MainWindow(QWidget* parent)
 		/*切换到myPlan之后当作抛弃搜索结果,也不能confirm*/
 		ui.btn_planConfirm->setEnabled(false);
 		ui.btn_planConfirm->setText(u8"添加计划");
+		logCout(QString(u8"用户正在查看当前计划:  ")
+			+ TransListToQString(user->GetPlan()));
 		});
 
 	/*处理查询最佳plan事件*/
@@ -182,21 +208,10 @@ MainWindow::MainWindow(QWidget* parent)
 	/*处理更新最佳plan事件*/
 	connect(ui.btn_planConfirm, &QPushButton::clicked, [=]() {
 		user->SetNewPlanFlag(true);
-
-		///*提示框,告知用户更新成功*/
-		//QMessageBox msg;
-		//msg.setIcon(QMessageBox::Icon::Information);
-		//msg.setText(
-		//	"Your plan is confirmed.\nYou can see your plan in [MyPlan] after it begin.\nYou can modify it before it started.");
-		//msg.setStandardButtons(QMessageBox::Ok);
-		//msg.setStyleSheet(
-		//	"QWidget{background-color: #35353b;}\
-		//	 QPushButton{background-color: #4891b4;}\
-		//	 QPushButton::hover{background-color: #54aad3;border: 1px solid #46a2da;}\
-		//	 QPushButton::pressed{background-color: #2385b4;border: 1px solid #46a2da;}");
-		//msg.setWindowFlag(Qt::FramelessWindowHint);
-		//msg.exec();
 		
+		logCout(u8"用户已确认添加以下新计划：" + TransListToQString(planCache));
+
+		/*用户已将最佳计划添加到*/
 		/*禁用confirm,改写成confirmed*/
 		ui.btn_planConfirm->setEnabled(false);
 		ui.btn_planConfirm->setText(u8"添加成功");
@@ -222,8 +237,9 @@ MainWindow::MainWindow(QWidget* parent)
 }
 
 MainWindow::~MainWindow() {
-	delete sys;
-	delete user;
+	delete sys;	/*删除系统*/
+	delete user;/*删除用户*/
+	logCout(u8"系统已关闭");
 }
 
 void MainWindow::timerEvent(QTimerEvent* ev)
@@ -237,7 +253,7 @@ void MainWindow::timerEvent(QTimerEvent* ev)
 		UpdateStatusBar();
 
 		/*更新乘客状态,更新地图*/
-		if (user->GetStatus() == User::status::stay)
+		if (user->GetStatus() == User::status::stay) {
 			if (user->HaveNewPlan()) {		/*如果当前没有正在执行的计划且cachePlan有计划时*/
 				user->UpdatePlan(planCache);/*则开始执行缓存的计划,状态变成suspend*/
 				user->SetNewPlanFlag(false);/*没有newPlan*/
@@ -246,11 +262,25 @@ void MainWindow::timerEvent(QTimerEvent* ev)
 				mapCanvas->AddPlan(planCache);
 
 			} else if (!mapCanvas->PlanEmpty()) {/*如果当前没正在执行的计划且mapCanvas还没同步*/
-				
+
 				/*清空plan*/
 				mapCanvas->ClearPlan();
-		}
 
+			}
+			logCout(QString(u8"乘客正停留在%1").arg(
+				QString::fromStdString(sys->GetCityList().at(user->GetCityIndex()).m_name)));
+		} else {
+
+			/*输出状态*/
+			int si = user->GetPlan().at(user->GetPlanIndex()).m_srcIndex;
+			int di = user->GetPlan().at(user->GetPlanIndex()).m_destIndex;
+			logCout(QString(u8"乘客正从%1前往%2,状态为%3")
+				.arg(QString::fromStdString(sys->GetCityList().at(si).m_name))
+				.arg(QString::fromStdString(sys->GetCityList().at(di).m_name))
+				.arg(QString::fromStdString(user->GetStatusName()))
+			);
+		}
+		
 		user->UpdateInfo(sys->GetTime(), sys->GetDay());
 		//qDebug() << QString::fromStdString(user->GetStatusName());
 
@@ -429,16 +459,28 @@ void MainWindow::ShowBestPlan()
 	/*获取最晚到达时间和日期*/
 	int endTime = ui.spinBox_endTime->value();
 	int endDay = ui.spinBox_endDay->value();
-
+	
 	/*-----------------------计算最佳方案-----------------------------*/
-	//qDebug() << ui_settings.check_limTime->isChecked();
-	if (TransSystem::CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
+	logCout(QString(u8"用户正在查询从 %1 到 %2, 期望到达时间为第 %3 天 %4:00 的方案,条件为:")
+		.arg(QString::fromStdString(sys->GetCityList().at(srcIndex).m_name))
+		.arg(QString::fromStdString(sys->GetCityList().at(destIndex).m_name))
+		.arg(endDay).arg(endTime)
+		+QString(u8"%1, %2, %3")
+		.arg(ui_settings.check_repVisit->isChecked() ? u8"允许重复" : u8"不允许重复")
+		.arg(ui_settings.check_limTime->isChecked() ? u8"必须按时到达" : u8"不一定要按时到达")
+		.arg(ui_settings.check_transRisk->isChecked() ? u8"考虑乘坐途中风险" : u8"不考虑乘坐途中风险")
+		);
+	
+		if (TransSystem::CompareDateTimeL(endTime, startTime, endDay, startDay)) {/*只有在合理的情况下才计算*/
 		planCache = sys->FindPlan(
 			srcIndex, destIndex, startDay, endDay, startTime, endTime,
 			ui_settings.check_repVisit->isChecked(),		/*获取用户是否考虑限时*/
 			ui_settings.check_limTime->isChecked(),			/*获取用户是否允许重复访问*/
 			ui_settings.check_transRisk->isChecked());		/*获取用户是否考虑交通工具的风险*/
 		SetTransList(ui.listWidget_plan, true, planCache);	/*将它展现在travel页中*/
+		
+		logCout(u8"查询成功, 计划为: " + TransListToQString(planCache));
+
 	} else {
 
 		/*显示提示框,调整样式*/
@@ -456,6 +498,8 @@ void MainWindow::ShowBestPlan()
 			 QPushButton::pressed{background-color: #2385b4;border: 1px solid #46a2da;}");
 		msg.setWindowFlag(Qt::FramelessWindowHint);
 		msg.exec();
+
+		logCout(u8"查询失败");
 	}
 
 	

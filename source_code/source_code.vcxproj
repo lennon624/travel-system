@@ -104,6 +104,7 @@
     <ClInclude Include="User.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="Diffnes.qss" />
   </ItemGroup>
   <ItemGroup>

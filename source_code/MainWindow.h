@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QListWidget>
+#include <fstream>
 #include "ui_MainWindow.h"
 #include "ui_SettingsWindow.h"
 #include "Transport.h"
@@ -64,6 +65,45 @@ private:
     void ShowBestPlan();
     void OnSettingChanged(int state); /*处理所有的设置变化*/
 
+    void logCout(const QString& str) {     /*打印函数*/
+        static int i = 0;
+        QFile file("travel.log");
+        if(i==0){ 
+            ++i;
+            file.open(QFile::Truncate | QFile::WriteOnly);
+        } else {
+			file.open(QFile::Append | QFile::WriteOnly);
+        }
+        QTextStream s(&file);
+        s << QString(u8"第 %1 天 %2:00  %3")
+            .arg(sys->GetDay())
+            .arg(sys->GetTime())
+            .arg(str)
+            << endl;
+            
+            //<< u8"第 " << sys->GetDay() << u8" 天  " << sys->GetTime()
+            //<< u8":00   "<< str << endl;   /*打印*/
+    }
+    const QString TransListToQString(const vector<Transport>translist) {
+        /*将计划变成字符串*/
+        if (translist.empty()) {
+            return u8"空";
+        } else {
+            /*写起始城市*/
+            QString str(QString::fromStdString(
+                sys->GetCityList()
+                .at(translist
+                    .at(0).m_srcIndex).m_name));
+            /*写后续城市*/
+            for (auto i:translist)
+            {
+                str.push_back(u8"->" + QString::fromStdString(
+					sys->GetCityList().at(i.m_destIndex).m_name)
+                );
+            }
+            return str;
+        }
+    }
 };
 
 

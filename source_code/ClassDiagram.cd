@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Vehicle">
+    <Position X="4" Y="1.5" Width="1.5" />
+    <NestedTypes>
+      <Typedef Name="Vehicle::Type" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Transport.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Struct Name="Vehicle::Attribute" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Transport.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAABAACIAAAAAAAAAAAAAAABAAAAgIAAAAAAACAAAA=</HashCode>
+      <FileName>Transport.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TransSystem" Collapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CZogQwAgAAgAEBABAYBAAAEAEAAgAAABAAAACAECABA=</HashCode>
+      <FileName>Transport.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="User">
+    <Position X="2.25" Y="1.5" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="User::status" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>User.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>EAgBAQEAAkAAAQBBIADCAAAMAIABAAQAAAgBQCAABAA=</HashCode>
+      <FileName>User.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MainWindow" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAACAAQAAAAAEAJQBAAMgADCgAAggAAAAAAAAIEQAQA=</HashCode>
+      <FileName>MainWindow.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MapCanvas" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAIABMAAAAEAAAhAIIACAAAIAUQAACAACgCBAAAQA=</HashCode>
+      <FileName>MapCanvas.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TransportFrame" Collapsed="true">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAEAAAAAABAAAAAAQAAAAAAAAAAAQAAAA=</HashCode>
+      <FileName>TransportFrame.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="City" Collapsed="true">
+    <Position X="0.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAIAAAAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Transport" Collapsed="true">
+    <Position X="2.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACgAkAAAAAAAEAAAAAQABAAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>
