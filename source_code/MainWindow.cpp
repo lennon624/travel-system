@@ -24,8 +24,8 @@ MainWindow::MainWindow(QWidget* parent)
 	QPushButton* closeDialog = new QPushButton(u8"确定",chooseDialog); /*关闭按钮*/
 	QLabel* timeTitle = new QLabel(u8"请选择时间比例(秒/小时):", chooseDialog);/*标题*/
 	QComboBox* timeCombo = new QComboBox(chooseDialog); /*选择时间框*/
+	timeCombo->addItem("1 : 2");
 	timeCombo->addItem("1 : 1");
-	timeCombo->addItem("2 : 1");
 	timeCombo->addItem("5 : 1");
 	timeCombo->addItem(u8"10 : 1   课设要求");
 	QLabel* chooseTitle = new QLabel(u8"请选择您当前所在的城市:", chooseDialog);/*标题*/
@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget* parent)
 	SetCityList(cityCombo, sys->GetCityList());			/*初始化所有城市列表*/
 	connect(closeDialog, &QPushButton::clicked, [=]() {
 		*originIndex = cityCombo->currentIndex();/*获取城市的值*/
-		int msec[4] = { 1000, 2000,5000,10000 };
+		int msec[4] = { 500, 1000,5000,10000 };
 		MS_PER_H =  msec[timeCombo->currentIndex()];	/*获取每小时多少秒*/
 		chooseDialog->close();					/*关闭窗口*/
 		});
