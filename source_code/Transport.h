@@ -27,7 +27,7 @@ using namespace std;
 //};
 //
 ///*声明所有交通工具的属性*/
-//extern const vector<VehAttr> vehAttrs;
+//extern const vector<VehAttr> vehAttrs;	
 
 class Vehicle
 {
@@ -96,7 +96,7 @@ struct Transport
 	//City m_srcCity;			
 	//City m_destCity;
 	int m_srcIndex;			/*起始城市序号*/
-	int m_destIndex;			/*终点城市序号*/
+	int m_destIndex;		/*终点城市序号*/
 	Vehicle::Type m_means;	/*交通方式*/
 	int m_startTime;		/*出发时间*/
 	int m_endTime;			/*到达时间*/
